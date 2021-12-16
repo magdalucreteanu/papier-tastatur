@@ -3,6 +3,9 @@
 ## Projektkonzept
 https://docs.google.com/document/d/1S-t-nOo0IA7ApgKbyGDlr8_PjbnLUInCJjxqr1Cm6nQ/edit#heading=h.pkiixjec93n1
 
+## Setup
+pip install websockets
+
 ## Offene Aufgaben
 - Kommunikation mit WebSockets erproben (inklusive Server starten). Eventuell die Kommunikation über eine MIDI Schnittstelle ermöglichen.
 - Identifizieren welche Taste wurde gedrückt auf die Papier Tastatur mittels OpenCV
