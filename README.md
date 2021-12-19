@@ -42,12 +42,6 @@ https://linuxhint.com/how-to-implement-a-websocket-in-python/
 https://betterprogramming.pub/how-to-create-a-websocket-in-python-b68d65dbd549  
 https://websocket-client.readthedocs.io/en/latest/examples.html  
 
-#### Kommunikation mit WebSockets (Beispiel befindet sich im Ordner WebSocket)
-cd websocket  
-Starte server: python server.py  
-Starte Browser Client (bekommt und sendet Daten): öffne client_demo.html in Browser  
-Starte Python Client (sendet Daten): python client_demo.py
-
 #### Simple-Server mit python auf Port 9999 starten:
 python -m http.server 9999
 
