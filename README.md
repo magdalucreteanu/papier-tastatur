@@ -4,15 +4,33 @@
 https://docs.google.com/document/d/1S-t-nOo0IA7ApgKbyGDlr8_PjbnLUInCJjxqr1Cm6nQ/edit#heading=h.pkiixjec93n1
 
 ## Setup
-pip install opencv-python
-pip install websockets
-pip install websocket-server
+pip install opencv-python  
+pip install websockets  
+pip install websocket-server  
 
-### Tastatur in Browser
-Der Code (HTML, CSS, JS, WebAudio) befindet sich im Ordner "browser".
+### WebSocket Server
+Der Websocket Server ermöglicht die Kommunikation über WebSockets zwischen Python und HTML Client.  
+Der Server läuft auf 127.0.0.1 (localhost) und Port 9001.  
+Server starten:
+- cd websocket
+- python server.py
+
+### Klaviertastatur im Browser
+Der Code (HTML, CSS, JS, WebAudio) befindet sich im Ordner "browser".  
+HTML Client starten:
+- cd browser
+- öffne die index.html Datei in einem Browser
 
 ### Papier Tastatur
-Der Code (python, opencv) befindet sich im Ordner "papier".
+Der Code (python, opencv) befindet sich im Ordner "papier".  
+Python Client starten:
+- cd papier
+- python video.py
+
+### Projekt starten
+1. Starte WebSocket Server  
+2. Starte HTML Client (Klaviertastatur in Browser)  
+3. Starte Python Client (Papier Tastatur)
 
 ## Links
 
@@ -20,15 +38,15 @@ Der Code (python, opencv) befindet sich im Ordner "papier".
 https://github.com/Pithikos/python-websocket-server
 
 ### HowTos
-https://linuxhint.com/how-to-implement-a-websocket-in-python/
-https://betterprogramming.pub/how-to-create-a-websocket-in-python-b68d65dbd549
-https://websocket-client.readthedocs.io/en/latest/examples.html
+https://linuxhint.com/how-to-implement-a-websocket-in-python/  
+https://betterprogramming.pub/how-to-create-a-websocket-in-python-b68d65dbd549  
+https://websocket-client.readthedocs.io/en/latest/examples.html  
 
 #### Kommunikation mit WebSockets (Beispiel befindet sich im Ordner WebSocket)
-cd WebSocket
-Starte server: python server.py
-Starte Browser Client (bekommt und sendet Daten): öffne client.html in Browser
-Starte Python Client (sendet Daten): python client.py
+cd websocket  
+Starte server: python server.py  
+Starte Browser Client (bekommt und sendet Daten): öffne client_demo.html in Browser  
+Starte Python Client (sendet Daten): python client_demo.py
 
 #### Simple-Server mit python auf Port 9999 starten:
 python -m http.server 9999
@@ -65,21 +83,20 @@ python -m http.server 9999
 Quelle für Frequenzen/Halbtöne: https://de.wikipedia.org/wiki/Frequenzen_der_gleichstufigen_Stimmung
 
 ### index.html
-Das script.js wird im Body (und nicht im Header) gesetzt.
+Das script.js wird im Body (und nicht im Header) gesetzt.  
 Begründung: wir benötigen Zugriff auf HTML document um die Tasten zu erstellen und das Dcoument ist erst im Body verfügbar.
 
 ### Tastatur in Browser
-Es gibt mehrere Möglichkeiten um die Tastatur in Browser anzuzeigen:
+Es gibt mehrere Möglichkeiten um die Tastatur in Browser anzuzeigen:  
 
-1. wir zeichnen die Klavier Tasten mit HTML5 Canvas.
-Alles wird manuell gezeichnet, d.H. wir berechnen welche und wo geometrische Figuren gezeichnet werden sollen. Wir müssen die Mausposition manuell finden um zu identifizieren welche Taste gedrückt wurde.
-Anschliessend müssen wir die gedrückten Tasten neu zeichen, um zu simulieren dass sie gedrückt wurden. Das ganze ist machbar, aber dafür ist die Logik etwas komplexer und weniger geeignet für HTML Seiten.
+1. wir zeichnen die Klavier Tasten mit HTML5 Canvas.  
+Alles wird manuell gezeichnet, d.H. wir berechnen welche und wo geometrische Figuren gezeichnet werden sollen. Wir müssen die Mausposition manuell finden um zu identifizieren welche Taste gedrückt wurde.  
+Anschliessend müssen wir die gedrückten Tasten neu zeichen, um zu simulieren dass sie gedrückt wurden. Das ganze ist machbar, aber dafür ist die Logik etwas komplexer und weniger geeignet für HTML Seiten.  
 
-2. wir nutzen HTML Elemente(z.B. Buttons) für die Klavier Tasten.
-Wir generieren dafür die Buttons (Tasten) dynamisch. Der Vorteil ist: wir können die Klaviertastatur jederzeit erweitern, ohne dass wir die Logik des Programms ändern.
-Wir zeigen dass eine Taste gedrückte oder nicht gedrückte ist indem wir auf HTML Elemente zugreifen und deren CSS Klassen zu ändern (entfernen oder hinzufügen).
-Die gedrückte Taste bekommt eine neue CSS Klasse 'pressed'. Diese Klasse ändert das visuelle Aussehen des gedrückten Elements und zeichnet es mit einer grauen Farbe.
-Die nicht gedrückten Tasten haben die Standard Farben, weiß für volle Töne und schwarz für Halbtöne.
-
+2. wir nutzen HTML Elemente(z.B. Buttons) für die Klavier Tasten.  
+Wir generieren dafür die Buttons (Tasten) dynamisch. Der Vorteil ist: wir können die Klaviertastatur jederzeit erweitern, ohne dass wir die Logik des Programms ändern.  
+Wir zeigen dass eine Taste gedrückte oder nicht gedrückte ist indem wir auf HTML Elemente zugreifen und deren CSS Klassen zu ändern (entfernen oder hinzufügen).  
+Die gedrückte Taste bekommt eine neue CSS Klasse 'pressed'. Diese Klasse ändert das visuelle Aussehen des gedrückten Elements und zeichnet es mit einer grauen Farbe.  
+Die nicht gedrückten Tasten haben die Standard Farben, weiß für volle Töne und schwarz für Halbtöne.  
 
 Wir haben uns für die zweite Variante entscheiden, d.H. jede Klaviertaste wird ein HTML Button der mittels CSS gestyled wird.

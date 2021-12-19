@@ -1,3 +1,29 @@
+// ------------------------- WEB SOCKET INITIALISIEREN  ---------------------------------------------------
+
+// WebSocket Kommunikation erstellen
+var websocket = new WebSocket("ws://127.0.0.1:9001/");
+
+// Event handlers für das WebSocket
+websocket.onopen = function() {
+  console.log("WebSocket opened");
+};
+
+websocket.onmessage = function(e) {
+  // e.data enthaltet das String mit Daten
+  websocketMessage(e.data);
+};
+
+websocket.onclose = function() {
+  console.log("WebSocket closed");
+};
+
+websocket.onerror = function(e) {
+  console.log(e)
+};
+
+
+// ------------------------- WEB AUDIO INITIALISIEREN ------------------------------------------------------
+
 // WebAudio context erstellen
 var audioContext = new (window.AudioContext || window.webkitAudioContext)();
 var oscillatorNode = audioContext.createOscillator()
@@ -41,6 +67,9 @@ noten.forEach(note => {
   document.getElementById('klavier').innerHTML += "<button onClick='klickNote(this)' " + klasse + " " + frequenz + "</button>"
 })
 
+
+// ------------------------- FUNKTIONEN --------------------------------------------------------------------
+
 // Taste wurde gedrückt
 function klickNote(element) {
   // Finde die aktuell gedrückten Tasten und entferne die 'pressed' CSS
@@ -55,19 +84,65 @@ function klickNote(element) {
 }
 
 // Volume Minus
-function minus() {
+function volumeMinus() {
   var newValue = gainNode.gain.value - 0.1
   if (newValue < 0) {
     newValue = 0
   }
-  gainNode.gain.setValueAtTime(newValue, audioContext.currentTime);
+  gainNode.gain.setValueAtTime(newValue, audioContext.currentTime)
 }
 
 // Volume Plus
-function plus() {
+function volumePlus() {
   var newValue = gainNode.gain.value + 0.1
   if (newValue > 1) {
     newValue = 1
   }
-  gainNode.gain.setValueAtTime(newValue, audioContext.currentTime);
+  gainNode.gain.setValueAtTime(newValue, audioContext.currentTime)
+}
+
+// Piano
+function piano() {
+  // TODO
+}
+
+// Synth
+function synth() {
+  // TODO
+}
+
+// Attack
+function attack(obj) {
+  // TODO
+}
+
+// Attack
+function release(obj) {
+  // TODO
+}
+
+// Eine neue Meldung kamm über WebSocket
+function websocketMessage(message) {
+  console.log(message)
+  const obj = JSON.parse(message)
+  switch(obj.name) {
+    case 'volume_minus':
+      volumeMinus()
+      break
+    case 'volume_plus':
+      volumePlus()
+      break
+    case 'piano':
+      piano()
+      break
+    case 'synth':
+      synth()
+      break
+    case 'attack':
+      attack(obj)
+      break
+    case 'release':
+      release(obj)
+      break
+  }
 }
