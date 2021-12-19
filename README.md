@@ -34,6 +34,9 @@ Starte Python Client (sendet Daten): python client.py
 python -m http.server 9999
 
 ## Offene Aufgaben
+- wie können wir Piano abspielen (derzeit ist Synth mit dem Oscillator simuliert)
+
+## Geplante Aufgaben
 - Kommunikation mit WebSockets erproben (inklusive Server starten). Eventuell die Kommunikation über eine MIDI Schnittstelle ermöglichen.
 - Identifizieren welche Taste wurde gedrückt auf die Papier Tastatur mittels OpenCV
 - Klaviertastatur graphisch mit HTML erstellen
@@ -55,3 +58,28 @@ python -m http.server 9999
 - Projektkonzept schreiben
 - Projektkonzept vorstellen
 - Github Projekt erstellen
+
+## Code und Algorithmen
+
+### Allgemeine Hinweise
+Quelle für Frequenzen/Halbtöne: https://de.wikipedia.org/wiki/Frequenzen_der_gleichstufigen_Stimmung
+
+### index.html
+Das script.js wird im Body (und nicht im Header) gesetzt.
+Begründung: wir benötigen Zugriff auf HTML document um die Tasten zu erstellen und das Dcoument ist erst im Body verfügbar.
+
+### Tastatur in Browser
+Es gibt mehrere Möglichkeiten um die Tastatur in Browser anzuzeigen:
+
+1. wir zeichnen die Klavier Tasten mit HTML5 Canvas.
+Alles wird manuell gezeichnet, d.H. wir berechnen welche und wo geometrische Figuren gezeichnet werden sollen. Wir müssen die Mausposition manuell finden um zu identifizieren welche Taste gedrückt wurde.
+Anschliessend müssen wir die gedrückten Tasten neu zeichen, um zu simulieren dass sie gedrückt wurden. Das ganze ist machbar, aber dafür ist die Logik etwas komplexer und weniger geeignet für HTML Seiten.
+
+2. wir nutzen HTML Elemente(z.B. Buttons) für die Klavier Tasten.
+Wir generieren dafür die Buttons (Tasten) dynamisch. Der Vorteil ist: wir können die Klaviertastatur jederzeit erweitern, ohne dass wir die Logik des Programms ändern.
+Wir zeigen dass eine Taste gedrückte oder nicht gedrückte ist indem wir auf HTML Elemente zugreifen und deren CSS Klassen zu ändern (entfernen oder hinzufügen).
+Die gedrückte Taste bekommt eine neue CSS Klasse 'pressed'. Diese Klasse ändert das visuelle Aussehen des gedrückten Elements und zeichnet es mit einer grauen Farbe.
+Die nicht gedrückten Tasten haben die Standard Farben, weiß für volle Töne und schwarz für Halbtöne.
+
+
+Wir haben uns für die zweite Variante entscheiden, d.H. jede Klaviertaste wird ein HTML Button der mittels CSS gestyled wird.
