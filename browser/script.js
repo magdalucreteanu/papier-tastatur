@@ -24,36 +24,30 @@ websocket.onerror = function(e) {
 
 // ------------------------- WEB AUDIO INITIALISIEREN ------------------------------------------------------
 
+// Spielt synth falls true, ansonsten spielt Klavier
+var isSynth = true
+
 // WebAudio context erstellen
 var audioContext = new (window.AudioContext || window.webkitAudioContext)();
 var oscillatorNode = audioContext.createOscillator()
 var gainNode = audioContext.createGain()
-
-// Oscillator Node konfigurieren
-oscillatorNode.frequency.value = 0
-// sofort starten
-oscillatorNode.start(0)
-oscillatorNode.connect(gainNode)
-
-// Gain Node konfigurieren
-gainNode.gain.value = 0.5
-gainNode.connect(audioContext.destination)
+synth()
 
 // Quelle für Frequenzen/Halbtöne: https://de.wikipedia.org/wiki/Frequenzen_der_gleichstufigen_Stimmung
 noten =
 [
-  { "frequez" : "130.813", "halbton" : false }, // C3
-  { "frequez" : "138.591", "halbton" : true } , // C#3/Db3
-  { "frequez" : "146.832", "halbton" : false }, // D3
-  { "frequez" : "155.563", "halbton" : true },  // D#3/Eb3
-  { "frequez" : "164.814", "halbton" : false }, // E3
-  { "frequez" : "174.614", "halbton" : false }, // F3
-  { "frequez" : "184.997", "halbton" : true },  // F#3/Gb3
-  { "frequez" : "195.998", "halbton" : false }, // G3
-  { "frequez" : "207.652", "halbton" : true },  // G#3/Ab3
-  { "frequez" : "220.000", "halbton" : false }, // A3
-  { "frequez" : "233.082", "halbton" : true },  // A#3/Bb3
-  { "frequez" : "246.942", "halbton" : false }  // B3
+  { "frequez" : "130.813", "halbton" : false, piano: "noten/key08.mp3" }, // C3
+  { "frequez" : "138.591", "halbton" : true, piano: "noten/key09.mp3" } , // C#3/Db3
+  { "frequez" : "146.832", "halbton" : false, piano: "noten/key10.mp3" }, // D3
+  { "frequez" : "155.563", "halbton" : true, piano: "noten/key11.mp3" },  // D#3/Eb3
+  { "frequez" : "164.814", "halbton" : false, piano: "noten/key12.mp3" }, // E3
+  { "frequez" : "174.614", "halbton" : false, piano: "noten/key13.mp3" }, // F3
+  { "frequez" : "184.997", "halbton" : true, piano: "noten/key14.mp3" },  // F#3/Gb3
+  { "frequez" : "195.998", "halbton" : false, piano: "noten/key15.mp3" }, // G3
+  { "frequez" : "207.652", "halbton" : true, piano: "noten/key16.mp3" },  // G#3/Ab3
+  { "frequez" : "220.000", "halbton" : false, piano: "noten/key17.mp3" }, // A3
+  { "frequez" : "233.082", "halbton" : true, piano: "noten/key18.mp3" },  // A#3/Bb3
+  { "frequez" : "246.942", "halbton" : false, piano: "noten/key19.mp3" }  // B3
 ]
 
 noten.forEach(note => {
@@ -61,26 +55,49 @@ noten.forEach(note => {
   var halbton = ((note.halbton) ? " halbton" : "")
   // erstelle die Klasse dafür
   var klasse = "class='klavier__btn basic" + halbton +  "'"
-  // setze die Frequenz der Note im HTML Element
+  // setze die Frequenz der Note für Synth im HTML Element
   var frequenz = "frequez='" + note.frequez + "'"
+  // setze die Datei für die Klaviernote
+  var piano = "piano='" + note.piano + "'"
   // die Note wird zum Element 'klavier' hinzugefügt
-  document.getElementById('klavier').innerHTML += "<button onClick='klickNote(this)' " + klasse + " " + frequenz + "</button>"
+  document.getElementById('klavier').innerHTML += "<button onClick='klickNote(this)' " + klasse + " " + frequenz + " " + piano + "</button>"
 })
 
 
 // ------------------------- FUNKTIONEN --------------------------------------------------------------------
 
-// Taste wurde gedrückt
-function klickNote(element) {
+function resetPressedElements() {
   // Finde die aktuell gedrückten Tasten und entferne die 'pressed' CSS
   var pressedElements = document.getElementsByClassName('pressed');
   // pressedElements ist eine HTMLCollection, wir müssen diese in Array konvertieren
-  Array.from(pressedElements).forEach(pressedElement => pressedElement.classList.remove('pressed'))
+  Array.from(pressedElements).forEach(pressedElement => pressedElement.classList.remove('pressed'))  
+}
+
+// Taste wurde gedrückt
+function klickNote(element) {
+  // entferne CSS 'pressed' von allen Tasten
+  this.resetPressedElements();
+
   // wir setzen die CSS 'pressed' zur gedrückten Taste
   element.classList.add('pressed')
 
-  // Frequenz setzen
-  oscillatorNode.frequency.value = parseInt(element.getAttribute('frequez'))
+  if (isSynth === true) {
+    // Frequenz setzen für Synth
+    oscillatorNode.frequency.value = parseInt(element.getAttribute('frequez'))
+  } else {
+    // Note setzen für Piano
+    let URL = element.getAttribute('piano')
+    window.fetch(URL)
+    .then(response => response.arrayBuffer())
+    .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+    .then(audioBuffer => {
+      const source = audioContext.createBufferSource()
+      source.buffer = audioBuffer
+      source.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+      source.start();
+    });
+  }
 }
 
 // Volume Minus
@@ -103,12 +120,42 @@ function volumePlus() {
 
 // Piano
 function piano() {
-  // TODO
+  isSynth = false
+
+  // Piano Button ist disabled
+  document.getElementById("piano").disabled = true;
+  // Synth Button ist enabled
+  document.getElementById("synth").disabled = false;
+
+  // entferne alle ausgewählten Tasten
+  this.resetPressedElements()
+
+  // beende oscillator ( = synth Node)
+  oscillatorNode.stop()
 }
 
 // Synth
 function synth() {
-  // TODO
+  isSynth = true
+
+  // Piano Button ist enabled
+  document.getElementById("piano").disabled = false;
+  // Synth Button ist enabled
+  document.getElementById("synth").disabled = true;
+
+  // entferne alle ausgewählten Tasten
+  this.resetPressedElements()
+
+  oscillatorNode = audioContext.createOscillator()
+  // Oscillator Node konfigurieren
+  oscillatorNode.frequency.value = 0
+  // sofort starten
+  oscillatorNode.start(0)
+  oscillatorNode.connect(gainNode)
+
+  // Gain Node konfigurieren
+  gainNode.gain.value = 0.5
+  gainNode.connect(audioContext.destination)
 }
 
 // Attack

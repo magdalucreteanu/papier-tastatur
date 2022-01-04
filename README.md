@@ -19,7 +19,8 @@ Server starten:
 Der Code (HTML, CSS, JS, WebAudio) befindet sich im Ordner "browser".  
 HTML Client starten:
 - cd browser
-- öffne die index.html Datei in einem Browser
+- python -m http.server 9999
+- öffne die localhost:9999 Datei in einem Browser
 
 ### Papier Tastatur
 Der Code (python, opencv) befindet sich im Ordner "papier".  
@@ -36,6 +37,10 @@ Python Client starten:
 
 ### Bibliotheken
 https://github.com/Pithikos/python-websocket-server
+
+### Klavier Noten
+https://archive.org/details/24-piano-keys/
+Die erste Note hier ist F und unsere Klaviertastatur beginnt mir C. D.H.: die erste C Note ist die achte Datei, also key08.mp3.
 
 ### HowTos
 https://linuxhint.com/how-to-implement-a-websocket-in-python/  
