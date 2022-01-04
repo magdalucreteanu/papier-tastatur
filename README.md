@@ -19,7 +19,7 @@ Server starten:
 Der Code (HTML, CSS, JS, WebAudio) befindet sich im Ordner "browser".  
 HTML Client starten:
 - cd browser
-- python -m http.server 9999
+- python -m http.server 9999 - wir benötigen einen WebServer um Zugriff auf lokalen Dateien (in unserem Fall Klaviernoten) zu haben. Ohne den WebServer erlaubt uns der Browser wegen CORS (Cross-Origin) Fehler den Zugriff auf Dateien nicht.
 - öffne die localhost:9999 Datei in einem Browser
 
 ### Papier Tastatur
