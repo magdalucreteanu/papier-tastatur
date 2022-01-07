@@ -44,7 +44,7 @@ def piano():
         "timestamp": time.time(),
         "name": "piano"
     }
-    send_message(data)
+    sendMessage(data)
 
 # Sende Synth Kommando über WebSocket
 def synth():
@@ -52,7 +52,7 @@ def synth():
         "timestamp": time.time(),
         "name": "synth"
     }
-    send_message(data)
+    sendMessage(data)
 
 # Sende Attack Kommando über WebSocket
 def attack():
@@ -61,7 +61,7 @@ def attack():
         "name": "attack"
         # TODO - Attack Kontrolparameter hier
     }
-    send_message(data)
+    sendMessage(data)
 
 # Sende Release Kommando über WebSocket
 def release():
@@ -70,7 +70,7 @@ def release():
         "name": "release"
         # TODO - Release Kontrolparameter hier
     }
-    send_message(data)
+    sendMessage(data)
 
 
 # ------------------------- VIDEO  --------------------------------------------------------
@@ -123,7 +123,7 @@ while cap.isOpened():
  
     # Abbruch bei Tastendruck
     if cv2.waitKey(25) != -1:
-        break;
+        break
 
 # cap wieder freigeben
 cap.release()
