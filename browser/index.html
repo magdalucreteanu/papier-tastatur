@@ -1,19 +1,31 @@
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <meta charset="utf-8">
-      <title>Papier Tastatur</title>
-      <link type="text/css" rel="stylesheet" href="stylesheet.css">
-    </head>
-    <body>
-      <div id="kontrollen" class="kontrollen">
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Papier Tastatur</title>
+    <link type="text/css" rel="stylesheet" href="stylesheet.css">
+  </head>
+  <body>
+    <div id="kontrollen" class="kontrollen">
+        <div id="buttonContainer">
           <button id="minus" onClick='volumeMinus()'>Minus</button>
           <button id="plus" onClick='volumePlus()'>Plus</button>
           <button id="piano" onClick='piano()'>Piano</button>
           <button id="synth" onClick='synth()'>Synth</button>
-      </div>
-      <div id="klavier" class="klavier">
-      </div>
-      <script type="text/javascript" src="script.js"></script>
-    </body>
-  </html>
+        </div>
+        <div id="sliderContainer">
+          <div id="attackContainer">Attack
+            <input type="range" min="0" max="100" value="10" class="slider" id="attackSlider">
+            <span id="attackOutput">0.1 sec</span>
+          </div>
+          <div id="releaseContainer">Release
+            <input type="range" min="0" max="100" value="10" class="slider" id="releaseSlider">
+            <span id="releaseOutput">0.1 sec</span>
+          </div>
+        </div>
+    </div>
+    <div id="klavier" class="klavier">
+    </div>
+    <script type="text/javascript" src="script.js"></script>
+  </body>
+</html>
