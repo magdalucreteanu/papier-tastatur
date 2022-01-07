@@ -28,7 +28,7 @@ def volumeMinus():
         "timestamp": time.time(),
         "name": "volume_minus"
     }
-    send_message(data)
+    sendMessage(data)
 
 # Sende ein Volume Minus Kommando über WobSocket
 def volumePlus():
@@ -36,7 +36,7 @@ def volumePlus():
         "timestamp": time.time(),
         "name": "volume_plus"
     }
-    send_message(data)
+    sendMessage(data)
 
 # Sende Piano Kommando über WebSocket
 def piano():
