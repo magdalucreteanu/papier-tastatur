@@ -31,6 +31,7 @@ var isSynth = true
 var audioContext = new (window.AudioContext || window.webkitAudioContext)();
 var oscillatorNode = audioContext.createOscillator()
 var gainNode = audioContext.createGain()
+let compressor = audioContext.createDynamicsCompressor();
 synth()
 
 // Quelle für Frequenzen/Halbtöne: https://de.wikipedia.org/wiki/Frequenzen_der_gleichstufigen_Stimmung
@@ -63,6 +64,15 @@ noten.forEach(note => {
   document.getElementById('klavier').innerHTML += "<button onClick='klickNote(this)' " + klasse + " " + frequenz + " " + piano + "</button>"
 })
 
+// ------------------------- EVENT LISTENER --------------------------------------------------------------------
+
+document.querySelector("#attackSlider").addEventListener("mousemove", function(e) {
+  attack(this.value);
+});
+
+document.querySelector("#releaseSlider").addEventListener("mousemove", function(e) {
+  release(this.value);
+});
 
 // ------------------------- FUNKTIONEN --------------------------------------------------------------------
 
@@ -91,10 +101,11 @@ function klickNote(element) {
     .then(response => response.arrayBuffer())
     .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
     .then(audioBuffer => {
-      const source = audioContext.createBufferSource()
-      source.buffer = audioBuffer
-      source.connect(gainNode)
-      gainNode.connect(audioContext.destination)
+      const source = audioContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(compressor);
+      compressor.connect(gainNode);
+      gainNode.connect(audioContext.destination);
       source.start();
     });
   }
@@ -151,7 +162,8 @@ function synth() {
   oscillatorNode.frequency.value = 0
   // sofort starten
   oscillatorNode.start(0)
-  oscillatorNode.connect(gainNode)
+  oscillatorNode.connect(compressor)
+  compressor.connect(gainNode)
 
   // Gain Node konfigurieren
   gainNode.gain.value = 0.5
@@ -160,12 +172,14 @@ function synth() {
 
 // Attack
 function attack(obj) {
-  // TODO
+  compressor.attack.value = (obj / 100);
+  document.querySelector("#attackOutput").innerHTML = (obj / 100) + " sec";
 }
 
 // Attack
 function release(obj) {
-  // TODO
+  compressor.release.value = (obj / 100);
+  document.querySelector("#releaseOutput").innerHTML = (obj / 100) + " sec";
 }
 
 // Eine neue Meldung kamm über WebSocket
