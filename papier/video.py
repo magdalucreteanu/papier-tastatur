@@ -14,6 +14,11 @@ s_keyboard_border_color = int(s_keyboard_border_color1)
 v_keyboard_border_color1 = keyboard_border_color_HSV[0][0][2]
 v_keyboard_border_color = int(v_keyboard_border_color1)
 
+# Für Halbtöne Klaviertasten und die Controls
+h_black = int(0)
+s_black = int(0)
+v_black = int(0)
+
 # Callback Funktion für Slider - tut nichts
 def do_nothing():
     return
@@ -77,6 +82,41 @@ def release():
     }
     sendMessage(data)
 
+#--------------------------FUNKTIONEN FÜRS VIDEO-------------------------------------------
+def findBiggestRegionsForColor(frame, h, s, v, threshold, numberRegions):
+    # TODO Idee: numberRegions gibt an, wie viele Regionen gefunden werden sollen
+    # So könnte man mit dieser Funktion auch die schwarzen kleinen Klaviertasten finden, 
+    # indem man hier 5 für numberRegions einträgt
+    # die Funktion sollte dann vielleicht einen Array mit den 5 größten Flächen einer Farbe zurückgeben
+
+    # Umwandlung in HSV Farbraum
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+    # Aktueller Threshold Wert
+    threshold = cv2.getTrackbarPos('Threshold', 'Tastatur')
+
+    lower = np.array([h - threshold, s - threshold, v - threshold])
+    upper = np.array([h + threshold, s + threshold, v + threshold])
+
+    # Threshold HSV image um nur Piano Randfarben zu bekommen
+    mask = cv2.inRange(hsv, lower, upper)
+
+    # Region Finding Algorithmus: liefert Array contours, jedes Objekt repräsentiert eine zusammenhängende Region
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    # Berechnet Fläche einer Region
+    biggestRegion = 0
+    biggestRegionIndex = 0
+    for index in range(len(contours)):
+        area = cv2.contourArea(contours[index])
+        # Schwärzung aller Regionen
+        cv2.drawContours(mask, contours, index, (0,0,0), cv2.FILLED)
+        # Bestimmung des Index der Region mit größter Fläche
+        if area > biggestRegion:
+            biggestRegion = area
+            biggestRegionIndex = index
+            cnt = contours[index]
+    return mask, contours, biggestRegionIndex, cnt
+
 
 # ------------------------- VIDEO  --------------------------------------------------------
 
@@ -101,39 +141,17 @@ while cap.isOpened():
     # Original Video anzeigen
     cv2.imshow('Original', frame)
 
-    # Umwandlung in HSV Farbraum
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
     # Threshold Wert aus Tracker lesen
     threshold = cv2.getTrackbarPos('Threshold', 'Tastatur')
 
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    # Keyboard Rand finden
+    mask, contours, biggestRegionIndex, cnt = findBiggestRegionsForColor(frame, h_keyboard_border_color, s_keyboard_border_color, v_keyboard_border_color, threshold, 1)
 
-    lower = np.array([h_keyboard_border_color - threshold, s_keyboard_border_color - threshold, v_keyboard_border_color - threshold])
-    upper = np.array([h_keyboard_border_color + threshold, s_keyboard_border_color + threshold, v_keyboard_border_color + threshold])
-
-    # Threshold HSV image um nur Piano Randfarben zu bekommen
-    mask = cv2.inRange(hsv, lower, upper)
-
-    # Region Finding Algorithmus: liefert Array contours, jedes Objekt repräsentiert eine zusammenhängende Region
-    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    # Berechnet Fläche einer Region. Im Beispiel werden die Flächen aller Regionen ausgegeben
-    biggestRegion = 0
-    biggestRegionIndex = 0
-    for index in range(len(contours)):
-        area = cv2.contourArea(contours[index])
-        # Schwärzung aller Regionen
-        cv2.drawContours(mask, contours, index, (0,0,0), cv2.FILLED)
-        # Bestimmung des Index der Region mit größter Fläche
-        if area > biggestRegion:
-            biggestRegion = area
-            biggestRegionIndex = index
-            cnt = contours[index]
-    # Zeichnet größte Region weiß
+    # Zeichnet größte Region (Keyboard) weiß
     cv2.drawContours(mask, contours, biggestRegionIndex, (255,255,255), cv2.FILLED)
 
+    # Keyboard zeichnen
     x,y,w,h = cv2.boundingRect(cnt)
-    
     cv2.rectangle(frame, (x,y), (x+w, y+h), color=(0, 255, 0), thickness=2)
 
     # Kombiniertes Ergebnis anzeigen
