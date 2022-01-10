@@ -50,24 +50,13 @@ https://websocket-client.readthedocs.io/en/latest/examples.html
 #### Simple-Server mit python auf Port 9999 starten:
 python -m http.server 9999
 
-## Offene Aufgaben
-- wie können wir Piano abspielen (derzeit ist Synth mit dem Oscillator simuliert)
-
 ## Geplante Aufgaben
-- Kommunikation mit WebSockets erproben (inklusive Server starten). Eventuell die Kommunikation über eine MIDI Schnittstelle ermöglichen.
 - Identifizieren welche Taste wurde gedrückt auf die Papier Tastatur mittels OpenCV
-- Klaviertastatur graphisch mit HTML erstellen
-- Informationen über die gedrückten Tasten mit WebSockets an HTML übergeben 
-- Papier- und HTML-Tastaturen sind beide funktional
-- Weitere Knöpfe (für Lautstärke, Effekte usw.) in HTML erstellen
-- Präsentation Inkrement
-- Identifizieren welcher Knopf wurde gedrückt auf die Papier Tastatur mittels OpenCV
 - Informationen über die gedrückten Knöpfe mit WebSockets/MIDI an HTML übergeben 
 - Papier- und HTML-Knöpfe sind beide funktional
 - Weitere Tests eventuell Bugfixes
 - Präsentation Projektergebnis
 - Abgabe Projektdokumentation und Konzept
-
 
 ## Erledigte Aufgaben
 - Durcharbeitung der Vorlesungsinhalte, Bearbeitung der Video und Audio Aufgaben, Vorstellung der bearbeiteten Aufgaben
@@ -75,6 +64,11 @@ python -m http.server 9999
 - Projektkonzept schreiben
 - Projektkonzept vorstellen
 - Github Projekt erstellen
+- wie können wir Piano abspielen (derzeit ist Synth mit dem Oscillator simuliert)
+- Kommunikation mit WebSockets erproben (inklusive Server starten). Eventuell die Kommunikation über eine MIDI Schnittstelle ermöglichen.
+- Klaviertastatur graphisch mit HTML erstellen
+- Präsentation Inkrement
+- Weitere Knöpfe (für Lautstärke, Effekte usw.) in HTML erstellen
 
 ## Code und Algorithmen
 
