@@ -80,7 +80,7 @@ function resetPressedElements() {
   // Finde die aktuell gedrückten Tasten und entferne die 'pressed' CSS
   var pressedElements = document.getElementsByClassName('pressed');
   // pressedElements ist eine HTMLCollection, wir müssen diese in Array konvertieren
-  Array.from(pressedElements).forEach(pressedElement => pressedElement.classList.remove('pressed'))  
+  Array.from(pressedElements).forEach(pressedElement => pressedElement.classList.remove('pressed'))
 }
 
 // Taste wurde gedrückt
@@ -138,11 +138,12 @@ function piano() {
   // Synth Button ist enabled
   document.getElementById("synth").disabled = false;
 
-  // entferne alle ausgewählten Tasten
-  this.resetPressedElements()
-
   // beende oscillator ( = synth Node)
   oscillatorNode.stop()
+
+  // Ausgewählte Taste wieder drücken
+  var pressedElements = document.getElementsByClassName('pressed');
+  Array.from(pressedElements).forEach(pressedElement => klickNote(pressedElement))
 }
 
 // Synth
@@ -153,9 +154,6 @@ function synth() {
   document.getElementById("piano").disabled = false;
   // Synth Button ist enabled
   document.getElementById("synth").disabled = true;
-
-  // entferne alle ausgewählten Tasten
-  this.resetPressedElements()
 
   oscillatorNode = audioContext.createOscillator()
   // Oscillator Node konfigurieren
@@ -168,6 +166,10 @@ function synth() {
   // Gain Node konfigurieren
   gainNode.gain.value = 0.5
   gainNode.connect(audioContext.destination)
+  
+  // Ausgewählte Taste wieder drücken
+  var pressedElements = document.getElementsByClassName('pressed');
+  Array.from(pressedElements).forEach(pressedElement => klickNote(pressedElement))
 }
 
 // Attack

@@ -218,6 +218,16 @@ def getReleaseRegion(keyboard_x,keyboard_y,pixel_size):
     release_h = pixel_size * paper_release_h
     return int(release_x), int(release_y), int(release_w), int(release_h)
 
+def isFingerIn(finger_x, finger_y, rectangle_x, rectangle_y, rectangle_w, rectangle_h):
+    return (rectangle_x < finger_x) and (finger_x < rectangle_x + rectangle_w) and (rectangle_y < finger_y) and (finger_y < rectangle_y + rectangle_h)
+
+
+def getMilliseconds():
+    return time.time_ns() // 1_000_000 
+
+def isCommandTimeoutExceeded(commandStart):
+    currentTime = getMilliseconds()
+    return (currentTime - commandStart) > 1000
 
 # ------------------------- VIDEO  --------------------------------------------------------
 
@@ -237,6 +247,9 @@ cap = cv2.VideoCapture('../media/Papiertastatur_MitFinger.mp4')
 # Live Video
 #cap=cv2.VideoCapture(0)
 
+# Zeitstempel für die Finger Kommandos
+commandStart = getMilliseconds()
+
 while cap.isOpened():
     ret, frame = cap.read()
 
@@ -255,16 +268,11 @@ while cap.isOpened():
     # Zeichnet größte Region (Finger) weiß
     cv2.drawContours(finger_mask, finger_contours, finger_biggestRegionIndex, (255,255,255), cv2.FILLED)
     # Finger zeichnen
-    #finger_x,finger_y,finger_w,finger_h = cv2.boundingRect(finger_cnt)
-    #cv2.rectangle(frame, (finger_x, finger_y), (finger_x + finger_w, finger_y + finger_h), color=(0, 0, 255), thickness=2)
     # wir finden die Spitze des Fingers (das ist die Top Y Koordinate)
-    finger_upper_point = tuple(finger_cnt[finger_cnt[:, :, 1].argmin()][0])
+    finger_upper_point = finger_cnt[finger_cnt[:, :, 1].argmin()][0]
     # und wir zeichnen einen Kreis. Dafür erxtrahieren wir den Radius der Finger, sodass unser Kreis über den Finger liegt
-    # python Tuples können nicht geändert werden, deswegen müssen wir das Tuple in einer Liste erst konvertieren
-    finger_upper_point_list = list(finger_upper_point)
-    finger_upper_point_list[1] = finger_upper_point_list[1] + finger_radius
-    finger_upper_point = tuple(finger_upper_point_list)
-    cv2.circle(frame, finger_upper_point, finger_radius, (0, 0, 255), -1)
+    finger_upper_point[1] = finger_upper_point[1] + finger_radius
+    cv2.circle(frame, tuple(finger_upper_point), finger_radius, (0, 0, 255), -1)
 
     ###################### KEYBOARD #################################
 
@@ -321,6 +329,68 @@ while cap.isOpened():
     ## Release zeichnen
     release_x, release_y, release_w, release_h = getReleaseRegion(keyboard_x,keyboard_y,pixel_size)
     cv2.rectangle(frame, (release_x, release_y), (release_x + release_w, release_y + release_h), color=(0, 255, 0), thickness=2)
+
+    ###################### PRÜFE WELCHES ELEMENT WURDE GEDRÜCKT #################################
+
+    finger_x = finger_upper_point[0]
+    finger_y = finger_upper_point[1]
+
+    # Volume Minus
+    if (isFingerIn(finger_x, finger_y, volume_minus_x, volume_minus_y, volume_minus_w, volume_minus_h)):
+        if (command != "Volume Minus"):
+            command = "Volume Minus"
+            commandStart = getMilliseconds()
+        elif isCommandTimeoutExceeded(commandStart):
+            print('Volume Minus')
+            volumeMinus()
+            command = 'none'
+    # Volume Plus
+    elif (isFingerIn(finger_x, finger_y, volume_plus_x, volume_plus_y, volume_plus_w, volume_plus_h)):
+        if (command != "Volume Plus"):
+            command = "Volume Plus"
+            commandStart = getMilliseconds()
+        elif isCommandTimeoutExceeded(commandStart):
+            print('Volume Plus')
+            volumePlus()
+            command = 'none'
+    # Piano
+    elif (isFingerIn(finger_x, finger_y, piano_x, piano_y, piano_w, piano_h)):
+        if (command != "Piano"):
+            command = "Piano"
+            commandStart = getMilliseconds()
+        elif isCommandTimeoutExceeded(commandStart):
+            print('Piano')
+            piano()
+            command = 'none'
+    # Synth
+    elif (isFingerIn(finger_x, finger_y, synth_x, synth_y, synth_w, synth_h)):
+        if (command != "Synth"):
+            command = "Synth"
+            commandStart = getMilliseconds()
+        elif isCommandTimeoutExceeded(commandStart):
+            print('Synth')
+            synth()
+            command = 'none'
+    # Attack
+    elif (isFingerIn(finger_x, finger_y, attack_x, attack_y, attack_w, attack_h)):
+        if (command != "Attack"):
+            command = "Attack"
+            commandStart = getMilliseconds()
+        elif isCommandTimeoutExceeded(commandStart):
+            print('Attack')
+            attack()
+            command = 'none'
+    # Release
+    elif (isFingerIn(finger_x, finger_y, release_x, release_y, release_w, release_h)):
+        if (command != "Release"):
+            command = "Release"
+            commandStart = getMilliseconds()
+        elif isCommandTimeoutExceeded(commandStart):
+            print('Release')
+            release()
+            command = 'none'
+    else:
+        command = 'none'
 
     ###################### ERGEBNISSE #################################
 
