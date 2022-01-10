@@ -38,7 +38,7 @@ Python Client starten:
 ### Bibliotheken
 https://github.com/Pithikos/python-websocket-server
 
-### Klavier Noten
+### Klavier Noten (mp3 Dateien)
 https://archive.org/details/24-piano-keys/
 Die erste Note hier ist F und unsere Klaviertastatur beginnt mir C. D.H.: die erste C Note ist die achte Datei, also key08.mp3.
 
@@ -46,6 +46,7 @@ Die erste Note hier ist F und unsere Klaviertastatur beginnt mir C. D.H.: die er
 https://linuxhint.com/how-to-implement-a-websocket-in-python/  
 https://betterprogramming.pub/how-to-create-a-websocket-in-python-b68d65dbd549  
 https://websocket-client.readthedocs.io/en/latest/examples.html  
+https://www.pyimagesearch.com/2016/04/11/finding-extreme-points-in-contours-with-opencv/  
 
 #### Simple-Server mit python auf Port 9999 starten:
 python -m http.server 9999

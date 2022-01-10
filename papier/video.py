@@ -7,17 +7,22 @@ import numpy as np
 # ausgewählter Pixel für den Tastaturrand
 keyboard_border_color = cv2.imread('../media/Tastaturrand_Farbe.jpg',cv2.IMREAD_COLOR )
 keyboard_border_color_HSV = cv2.cvtColor(keyboard_border_color, cv2.COLOR_BGR2HSV)
-h_keyboard_border_color1 = keyboard_border_color_HSV[0][0][0]
-h_keyboard_border_color = int(h_keyboard_border_color1)
-s_keyboard_border_color1 = keyboard_border_color_HSV[0][0][1]
-s_keyboard_border_color = int(s_keyboard_border_color1)
-v_keyboard_border_color1 = keyboard_border_color_HSV[0][0][2]
-v_keyboard_border_color = int(v_keyboard_border_color1)
+h_keyboard_border_color = int(keyboard_border_color_HSV[0][0][0])
+s_keyboard_border_color = int(keyboard_border_color_HSV[0][0][1])
+v_keyboard_border_color = int(keyboard_border_color_HSV[0][0][2])
 
 # Für Halbtöne Klaviertasten und die Controls
 h_black = int(0)
 s_black = int(0)
 v_black = int(0)
+
+# ausgewählter Pixel für den Finger
+finger_color = cv2.imread('../media/Finger_Farbe.jpg',cv2.IMREAD_COLOR )
+finger_color_HSV = cv2.cvtColor(finger_color, cv2.COLOR_BGR2HSV)
+h_finger_color = int(finger_color_HSV[0][0][0])
+s_finger_color = int(finger_color_HSV[0][0][1])
+v_finger_color = int(finger_color_HSV[0][0][2])
+finger_radius = 30
 
 # Koordinaten der Elemente innerhalb des originalen Bilders (mit den zwei Beispieltastaturen)
 # Das Bild befindet sich in media/Papier_Tastatur_Image.jpeg
@@ -146,9 +151,6 @@ def findBiggestRegionsForColor(frame, h, s, v, threshold, numberRegions):
     # Umwandlung in HSV Farbraum
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    # Aktueller Threshold Wert
-    threshold = cv2.getTrackbarPos('Threshold', 'Tastatur')
-
     lower = np.array([h - threshold, s - threshold, v - threshold])
     upper = np.array([h + threshold, s + threshold, v + threshold])
 
@@ -172,7 +174,7 @@ def findBiggestRegionsForColor(frame, h, s, v, threshold, numberRegions):
     return mask, contours, biggestRegionIndex, cnt
 
 def getPixelSize(w):
-    return 1.0 * w / (paper_outer_margin_lower_x - paper_outer_margin_upper_x)
+    return 1.0 * w / (paper_outer_margin_lower_y - paper_outer_margin_upper_y)
 
 def getVolumeMinusRegion(keyboard_x,keyboard_y,pixel_size):
     volume_minus_x = keyboard_x + pixel_size * (paper_volume_minus_upper_x -  paper_outer_margin_upper_x)
@@ -224,9 +226,13 @@ cv2.namedWindow("Tastatur")
 # Tracker in Tastatur Window erstellen
 cv2.createTrackbar("Threshold", "Tastatur", 80, 100, do_nothing)
 
+# Named Window Finger erstellen
+cv2.namedWindow("Finger")
+# Tracker in Finger Window erstellen
+cv2.createTrackbar("Threshold", "Finger", 75, 100, do_nothing)
+
 #Video aus Datei öffnen
-# cap = cv2.VideoCapture('../media/Papier_Tastatur_Video_MP4.mp4')
-cap = cv2.VideoCapture('../media/Papiertastatur_OhneFinger.mp4')
+cap = cv2.VideoCapture('../media/Papiertastatur_MitFinger.mp4')
 
 # Live Video
 #cap=cv2.VideoCapture(0)
@@ -240,21 +246,57 @@ while cap.isOpened():
     # Original Video anzeigen
     cv2.imshow('Original', frame)
 
-    # Threshold Wert aus Tracker lesen
-    threshold = cv2.getTrackbarPos('Threshold', 'Tastatur')
+    ###################### FINGER #################################
 
+    # Threshold Wert aus Tracker lesen
+    finger_threshold = cv2.getTrackbarPos('Threshold', 'Finger')
+    # Finger Rand finden
+    finger_mask, finger_contours, finger_biggestRegionIndex, finger_cnt = findBiggestRegionsForColor(frame, h_finger_color, s_finger_color, v_finger_color, finger_threshold, 1)
+    # Zeichnet größte Region (Finger) weiß
+    cv2.drawContours(finger_mask, finger_contours, finger_biggestRegionIndex, (255,255,255), cv2.FILLED)
+    # Finger zeichnen
+    #finger_x,finger_y,finger_w,finger_h = cv2.boundingRect(finger_cnt)
+    #cv2.rectangle(frame, (finger_x, finger_y), (finger_x + finger_w, finger_y + finger_h), color=(0, 0, 255), thickness=2)
+    # wir finden die Spitze des Fingers (das ist die Top Y Koordinate)
+    finger_upper_point = tuple(finger_cnt[finger_cnt[:, :, 1].argmin()][0])
+    # und wir zeichnen einen Kreis. Dafür erxtrahieren wir den Radius der Finger, sodass unser Kreis über den Finger liegt
+    # python Tuples können nicht geändert werden, deswegen müssen wir das Tuple in einer Liste erst konvertieren
+    finger_upper_point_list = list(finger_upper_point)
+    finger_upper_point_list[1] = finger_upper_point_list[1] + finger_radius
+    finger_upper_point = tuple(finger_upper_point_list)
+    cv2.circle(frame, finger_upper_point, finger_radius, (0, 0, 255), -1)
+
+    ###################### KEYBOARD #################################
+
+    # Threshold Wert aus Tracker lesen
+    keyboard_threshold = cv2.getTrackbarPos('Threshold', 'Tastatur')
     # Keyboard Rand finden
-    mask, contours, biggestRegionIndex, cnt = findBiggestRegionsForColor(frame, h_keyboard_border_color, s_keyboard_border_color, v_keyboard_border_color, threshold, 1)
+    keyboard_mask, keyboard_contours, keyboard_biggestRegionIndex, keyboard_cnt = findBiggestRegionsForColor(frame, h_keyboard_border_color, s_keyboard_border_color, v_keyboard_border_color, keyboard_threshold, 1)
 
     # Zeichnet größte Region (Keyboard) weiß
-    cv2.drawContours(mask, contours, biggestRegionIndex, (255,255,255), cv2.FILLED)
+    cv2.drawContours(keyboard_mask, keyboard_contours, keyboard_biggestRegionIndex, (255,255,255), cv2.FILLED)
 
     # Keyboard zeichnen
-    keyboard_x,keyboard_y,keyboard_w,keyboard_h = cv2.boundingRect(cnt)
+    keyboard_x,keyboard_y,keyboard_w,keyboard_h = cv2.boundingRect(keyboard_cnt)
+    # es ist möglich dass die Hand/Finger ein Teil der Tasatur abdeckt
+    # in diesem Fall wird nicht die ganze Tastatur als Contour identifiziert, sondern nur einen Teil
+    # und wir müssen die richtigen Koordinaten berechnen
+    if (keyboard_w < 2 * keyboard_h):
+        # Teil der Tastatur ist von Hand abgedeckt und muss richtig berechnete werden
+        # Shift nach Rechts für X
+        keyboard_x = keyboard_x + keyboard_w
+        # neues Width berechnen
+        keyboard_w = int(2.05 * keyboard_h)
+        # Shift nach Links für X
+        keyboard_x = keyboard_x - keyboard_w
     cv2.rectangle(frame, (keyboard_x, keyboard_y), (keyboard_x + keyboard_w, keyboard_y + keyboard_h), color=(0, 255, 0), thickness=2)
 
+    ###################### PIXEL GRÖßE #################################
+
     # relative Pixelgrüße finden
-    pixel_size = getPixelSize(keyboard_w)
+    pixel_size = getPixelSize(keyboard_h)
+
+    ###################### KNÖPFE #################################
 
     ## Volume Minus zeichnen
     volume_minus_x, volume_minus_y, volume_minus_w, volume_minus_h = getVolumeMinusRegion(keyboard_x,keyboard_y,pixel_size)
@@ -280,8 +322,11 @@ while cap.isOpened():
     release_x, release_y, release_w, release_h = getReleaseRegion(keyboard_x,keyboard_y,pixel_size)
     cv2.rectangle(frame, (release_x, release_y), (release_x + release_w, release_y + release_h), color=(0, 255, 0), thickness=2)
 
+    ###################### ERGEBNISSE #################################
+
     # Kombiniertes Ergebnis anzeigen
-    cv2.imshow('Tastatur', mask)
+    cv2.imshow('Tastatur', keyboard_mask)
+    cv2.imshow('Finger', finger_mask)
     cv2.imshow("Contour", frame)
  
     # Abbruch bei Tastendruck
