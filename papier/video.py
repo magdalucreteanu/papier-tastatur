@@ -304,7 +304,6 @@ cap = cv2.VideoCapture('../media/Papiertastatur_MitFinger.mp4')
 
 # Zeitstempel für die Finger Kommandos
 commandStart = getMilliseconds()
-
 while cap.isOpened():
     ret, frame = cap.read()
 
@@ -367,44 +366,25 @@ while cap.isOpened():
     innerKeyboard_x, innerKeyboard_y, innerKeyboard_w, innerKeyboard_h = getInnerKeyboard(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size)
     # cv2.rectangle(frame, (innerKeyboard_x, innerKeyboard_y), (innerKeyboard_x + innerKeyboard_w, innerKeyboard_y + innerKeyboard_h), color=(255, 0, 0), thickness=5)
 
-    keys = []
     ## Weiße Tasten zeichnen
-    key0_x, key0_y, key0_w, key0_h = getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,0)
-    cv2.rectangle(frame, (key0_x, key0_y), (key0_x + key0_w, key0_y + key0_h), color=(0, 0, 255), thickness=2)
-
-    key1_x, key1_y, key1_w, key1_h = getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,1)
-    cv2.rectangle(frame, (key1_x, key1_y), (key1_x + key1_w, key1_y + key1_h), color=(0, 0, 255), thickness=2)
-
-    key2_x, key2_y, key2_w, key2_h = getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,2)
-    cv2.rectangle(frame, (key2_x, key2_y), (key2_x + key2_w, key2_y + key2_h), color=(0, 0, 255), thickness=2)
-
-    key3_x, key3_y, key3_w, key3_h = getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,3)
-    cv2.rectangle(frame, (key3_x, key3_y), (key3_x + key3_w, key3_y + key3_h), color=(0, 0, 255), thickness=2)
-
-    key4_x, key4_y, key4_w, key4_h = getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,4)
-    cv2.rectangle(frame, (key4_x, key4_y), (key4_x + key4_w, key4_y + key4_h), color=(0, 0, 255), thickness=2)
-
-    key5_x, key5_y, key5_w, key5_h = getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,5)
-    cv2.rectangle(frame, (key5_x, key5_y), (key5_x + key5_w, key5_y + key5_h), color=(0, 0, 255), thickness=2)
-
-    key6_x, key6_y, key6_w, key6_h = getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,6)
-    cv2.rectangle(frame, (key6_x, key6_y), (key6_x + key6_w, key6_y + key6_h), color=(0, 0, 255), thickness=2)
+    whiteKeys = np.zeros(shape=(7,4))
+    for x in range(7):
+        key_x, key_y, key_w, key_h = getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,x)
+        whiteKeys[x,0] = key_x 
+        whiteKeys[x,1] = key_y 
+        whiteKeys[x,2] = key_w
+        whiteKeys[x,3] = key_h
+        cv2.rectangle(frame, (key_x, key_y), (key_x + key_w, key_y + key_h), color=(0, 0, 255), thickness=2)
 
     ## Schwarze Tasten zeichnen
-    blackKey0_x, blackKey0_y, blackKey0_w, blackKey0_h = getBlackKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,0)
-    cv2.rectangle(frame, (blackKey0_x, blackKey0_y), (blackKey0_x + blackKey0_w, blackKey0_y + blackKey0_h), color=(0, 255, 255), thickness=2)
-
-    blackKey1_x, blackKey1_y, blackKey1_w, blackKey1_h = getBlackKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,1)
-    cv2.rectangle(frame, (blackKey1_x, blackKey1_y), (blackKey1_x + blackKey1_w, blackKey1_y + blackKey1_h), color=(0, 255, 255), thickness=2)
-
-    blackKey2_x, blackKey2_y, blackKey2_w, blackKey2_h = getBlackKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,2)
-    cv2.rectangle(frame, (blackKey2_x, blackKey2_y), (blackKey2_x + blackKey2_w, blackKey2_y + blackKey2_h), color=(0, 255, 255), thickness=2)
-
-    blackKey3_x, blackKey3_y, blackKey3_w, blackKey3_h = getBlackKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,3)
-    cv2.rectangle(frame, (blackKey3_x, blackKey3_y), (blackKey3_x + blackKey3_w, blackKey3_y + blackKey3_h), color=(0, 255, 255), thickness=2)
-
-    blackKey4_x, blackKey4_y, blackKey4_w, blackKey4_h = getBlackKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,4)
-    cv2.rectangle(frame, (blackKey4_x, blackKey4_y), (blackKey4_x + blackKey4_w, blackKey4_y + blackKey4_h), color=(0, 255, 255), thickness=2)
+    blackKeys = np.zeros(shape=(5,4))
+    for y in range(5):
+        key_x, key_y, key_w, key_h = getBlackKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,y)
+        blackKeys[y,0] = key_x 
+        blackKeys[y,1] = key_y 
+        blackKeys[y,2] = key_w
+        blackKeys[y,3] = key_h
+        cv2.rectangle(frame, (key_x, key_y), (key_x + key_w, key_y + key_h), color=(0, 255, 255), thickness=2)
     
     ## Volume Minus zeichnen
     volume_minus_x, volume_minus_y, volume_minus_w, volume_minus_h = getVolumeMinusRegion(keyboard_x,keyboard_y,pixel_size)
@@ -434,18 +414,33 @@ while cap.isOpened():
 
     finger_x = finger_upper_point[0]
     finger_y = finger_upper_point[1]
+    fingerOnBlackKey = False
 
     # Inner Keyboard
     if (isFingerIn(finger_x, finger_y, innerKeyboard_x, innerKeyboard_y, innerKeyboard_w, innerKeyboard_h)):
-        # Wenn im inneren Keyboard, dann
-        # TODO
-        if (command != "Play Key"):
-            command = "Play Key"
-            commandStart = getMilliseconds()
-        elif isCommandTimeoutExceeded(commandStart):
-            print('Play Key')
-            # do something
-            command = 'none'
+        # Wenn im inneren Keyboard, dann erst schwarze Tasten überprüfen
+        # Black Keys
+        for x in range(5):
+            if (isFingerIn(finger_x, finger_x, blackKeys[x,0], blackKeys[x,1], blackKeys[x,2], blackKeys[x,3])):
+                fingerOnBlackKey = True
+                if (command != "Play Black Key " + str(x)):
+                    command = "Play Black Key " + str(x)
+                    commandStart = getMilliseconds()
+                elif isCommandTimeoutExceeded(commandStart):
+                    print('Play Black Key ' + str(x))
+                    # do something
+                    command = 'none'
+        # White Keys
+        if not fingerOnBlackKey: # Schwarze Tasten liegen im Bereich der weißen Tasten, deswegen erst sichergehen, dass keine schwarze Taste gedrückt wurde
+            for y in range(7):
+                if (isFingerIn(finger_x, finger_x, whiteKeys[y,0], whiteKeys[y,1], whiteKeys[y,2], whiteKeys[y,3])):
+                    if (command != "Play White Key " + str(y)):
+                        command = "Play White Key " + str(y)
+                        commandStart = getMilliseconds()
+                    elif isCommandTimeoutExceeded(commandStart):
+                        print('Play White Key ' + str(y))
+                        # do something
+                        command = 'none'
     # Volume Minus
     elif (isFingerIn(finger_x, finger_y, volume_minus_x, volume_minus_y, volume_minus_w, volume_minus_h)):
         if (command != "Volume Minus"):
