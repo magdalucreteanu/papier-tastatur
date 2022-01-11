@@ -6,7 +6,7 @@ https://docs.google.com/document/d/1S-t-nOo0IA7ApgKbyGDlr8_PjbnLUInCJjxqr1Cm6nQ/
 ## Setup
 pip install opencv-python  
 pip install websockets  
-pip install websocket  
+pip install websocket-client   
 pip install websocket-server  
 
 ### WebSocket Server
@@ -50,7 +50,14 @@ https://websocket-client.readthedocs.io/en/latest/examples.html
 https://www.pyimagesearch.com/2016/04/11/finding-extreme-points-in-contours-with-opencv/  
 
 #### Simple-Server mit python auf Port 9999 starten:
-python -m http.server 9999
+python -m http.server 9999  
+
+## Offene Aufgaben
+Projektkonzept  
+- Sequence Diagram  
+- Usecase Diagram  
+- Quellen  
+- Bilder referenzieren und verzeichnen
 
 ## Geplante Aufgaben
 - Identifizieren welche Taste wurde gedrückt auf die Papier Tastatur mittels OpenCV
