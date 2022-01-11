@@ -6,6 +6,7 @@ https://docs.google.com/document/d/1S-t-nOo0IA7ApgKbyGDlr8_PjbnLUInCJjxqr1Cm6nQ/
 ## Setup
 pip install opencv-python  
 pip install websockets  
+pip install websocket  
 pip install websocket-server  
 
 ### WebSocket Server
