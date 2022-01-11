@@ -142,11 +142,7 @@ def release():
     sendMessage(data)
 
 #--------------------------FUNKTIONEN FÜRS VIDEO-------------------------------------------
-def findBiggestRegionsForColor(frame, h, s, v, threshold, numberRegions):
-    # TODO Idee: numberRegions gibt an, wie viele Regionen gefunden werden sollen
-    # So könnte man mit dieser Funktion auch die schwarzen kleinen Klaviertasten finden, 
-    # indem man hier 5 für numberRegions einträgt
-    # die Funktion sollte dann vielleicht einen Array mit den 5 größten Flächen einer Farbe zurückgeben
+def findBiggestRegionForColor(frame, h, s, v, threshold):
 
     # Umwandlung in HSV Farbraum
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -177,6 +173,41 @@ def findBiggestRegionsForColor(frame, h, s, v, threshold, numberRegions):
 def getPixelSize(w):
     return 1.0 * w / (paper_outer_margin_lower_y - paper_outer_margin_upper_y)
 
+def getInnerKeyboard(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size):
+    innerKeyboard_x = keyboard_x + pixel_size * (paper_inner_margin_upper_x - paper_outer_margin_upper_x)
+    innerKeyboard_y = keyboard_y + pixel_size * (paper_inner_margin_upper_y - paper_outer_margin_upper_y) 
+    innerKeyboard_w = keyboard_w - 2 * (pixel_size * (paper_inner_margin_upper_x - paper_outer_margin_upper_x))
+    innerKeyboard_h = keyboard_h - 2 * (pixel_size * (paper_inner_margin_upper_y - paper_outer_margin_upper_y))
+    return int(innerKeyboard_x), int(innerKeyboard_y), int(innerKeyboard_w), int(innerKeyboard_h)
+
+def getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size, key_number):
+    # Keyboard innen Koordinaten links oben + Weite und Höhe
+    innerKeyborad_x = keyboard_x + pixel_size * (paper_inner_margin_upper_x - paper_outer_margin_upper_x)
+    key_y = keyboard_y + pixel_size * (paper_inner_margin_upper_y - paper_outer_margin_upper_y) # key_y = innerKeyborad_y 
+    innerKeyborad_w = keyboard_w - 2 * (pixel_size * (paper_inner_margin_upper_x - paper_outer_margin_upper_x))
+    key_h = keyboard_h - 2 * (pixel_size * (paper_inner_margin_upper_y - paper_outer_margin_upper_y)) # key_h = innerKeyborad_h 
+    
+    key_x = innerKeyborad_x + key_number * (innerKeyborad_w / 7)
+    key_w = innerKeyborad_w / 7
+
+    return int(key_x), int(key_y), int(key_w), int(key_h)
+
+def getBlackKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size, key_number):
+    # Für die "Lücke" in der Tastatur
+    if key_number > 1:
+        key_number += 1
+    # Keyboard innen Koordinaten links oben + Weite und Höhe
+    innerKeyborad_x = keyboard_x + pixel_size * (paper_inner_margin_upper_x - paper_outer_margin_upper_x)
+    key_y = keyboard_y + pixel_size * (paper_inner_margin_upper_y - paper_outer_margin_upper_y) # key_y = innerKeyborad_y
+    innerKeyborad_w = keyboard_w - 2 * (pixel_size * (paper_inner_margin_upper_x - paper_outer_margin_upper_x))
+    innerKeyborad_h = keyboard_h - 2 * (pixel_size * (paper_inner_margin_upper_y - paper_outer_margin_upper_y))
+    
+    key_x = innerKeyborad_x + (key_number * 2 + 1.5)  * (innerKeyborad_w / 14)
+    key_w = innerKeyborad_w / 14
+    key_h = innerKeyborad_h * 2/3
+
+    return int(key_x), int(key_y), int(key_w), int(key_h)
+
 def getVolumeMinusRegion(keyboard_x,keyboard_y,pixel_size):
     volume_minus_x = keyboard_x + pixel_size * (paper_volume_minus_upper_x -  paper_outer_margin_upper_x)
     volume_minus_y = keyboard_y + pixel_size * (paper_volume_minus_upper_y - paper_outer_margin_upper_y)
@@ -192,6 +223,7 @@ def getVolumePlusRegion(keyboard_x,keyboard_y,pixel_size):
     return int(volume_plus_x), int(volume_plus_y), int(volume_plus_w), int(volume_plus_h)
 
 def getPianoRegion(keyboard_x,keyboard_y,pixel_size):
+    # Nicht das Piano, sondern nur der Piano Button
     piano_x = keyboard_x + pixel_size * (paper_piano_upper_x -  paper_outer_margin_upper_x)
     piano_y = keyboard_y + pixel_size * (paper_piano_upper_y - paper_outer_margin_upper_y)
     piano_w = pixel_size * paper_piano_w
@@ -231,6 +263,7 @@ def isCommandTimeoutExceeded(commandStart):
     return (currentTime - commandStart) > 1000
 
 def colorPicker(event,x,y,flags,param): 
+    # Bei anderen Lichtverhältnissen die Farbe anpassen
     global h_keyboard_border_color, s_keyboard_border_color, v_keyboard_border_color, h_finger_color, s_finger_color, v_finger_color
     # Pixel an der Mausposition
     pixel = frame[y, x]
@@ -242,11 +275,13 @@ def colorPicker(event,x,y,flags,param):
         h_keyboard_border_color = int(color_HSV[0][0][0])
         s_keyboard_border_color = int(color_HSV[0][0][1])
         v_keyboard_border_color = int(color_HSV[0][0][2])
+        print("Tastaturfarbe angepasst")
     #Rechtsklick passt die Farbe der Hand an
     elif event == cv2.EVENT_RBUTTONDOWN:
         h_finger_color = int(color_HSV[0][0][0])
         s_finger_color = int(color_HSV[0][0][1])
         v_finger_color = int(color_HSV[0][0][2])
+        print("Handfarbe angepasst")
 
 
 # ------------------------- VIDEO  --------------------------------------------------------
@@ -262,10 +297,10 @@ cv2.namedWindow("Finger")
 cv2.createTrackbar("ThresholdFinger", "Finger", 75, 100, do_nothing)
 
 #Video aus Datei öffnen
-#cap = cv2.VideoCapture('../media/Papiertastatur_MitFinger.mp4')
+cap = cv2.VideoCapture('../media/Papiertastatur_MitFinger.mp4')
 
 # Live Video
-cap=cv2.VideoCapture(0)
+#cap=cv2.VideoCapture(0)
 
 # Zeitstempel für die Finger Kommandos
 commandStart = getMilliseconds()
@@ -274,7 +309,7 @@ while cap.isOpened():
     ret, frame = cap.read()
 
     # Skaling (für mp4-Video)
-    #frame = cv2.resize(frame, (960, 540)) 
+    frame = cv2.resize(frame, (960, 540)) 
 
     # Original Video anzeigen
     cv2.imshow('Original', frame)
@@ -286,22 +321,22 @@ while cap.isOpened():
     # Threshold Wert aus Tracker lesen
     finger_threshold = cv2.getTrackbarPos('ThresholdFinger', 'Finger')
     # Finger Rand finden
-    finger_mask, finger_contours, finger_biggestRegionIndex, finger_cnt = findBiggestRegionsForColor(frame, h_finger_color, s_finger_color, v_finger_color, finger_threshold, 1)
+    finger_mask, finger_contours, finger_biggestRegionIndex, finger_cnt = findBiggestRegionForColor(frame, h_finger_color, s_finger_color, v_finger_color, finger_threshold)
     # Zeichnet größte Region (Finger) weiß
     cv2.drawContours(finger_mask, finger_contours, finger_biggestRegionIndex, (255,255,255), cv2.FILLED)
     # Finger zeichnen
     # wir finden die Spitze des Fingers (das ist die Top Y Koordinate)
-    finger_upper_point = tuple(finger_cnt[finger_cnt[:,:,1].argmin()][0])
+    finger_upper_point = finger_cnt[finger_cnt[:,:,1].argmin()][0]
     # und wir zeichnen einen Kreis. Dafür erxtrahieren wir den Radius der Finger, sodass unser Kreis über den Finger liegt
-    #finger_upper_point[1] = finger_upper_point[1] + finger_radius
-    cv2.circle(frame, finger_upper_point, finger_radius, (0, 0, 255), -1)
+    finger_upper_point[1] = finger_upper_point[1] + finger_radius
+    cv2.circle(frame, tuple(finger_upper_point), finger_radius, (0, 0, 255), -1)
 
     ###################### KEYBOARD #################################
 
     # Threshold Wert aus Tracker lesen
     keyboard_threshold = cv2.getTrackbarPos('ThresholdTastatur', 'Tastatur')
     # Keyboard Rand finden
-    keyboard_mask, keyboard_contours, keyboard_biggestRegionIndex, keyboard_cnt = findBiggestRegionsForColor(frame, h_keyboard_border_color, s_keyboard_border_color, v_keyboard_border_color, keyboard_threshold, 1)
+    keyboard_mask, keyboard_contours, keyboard_biggestRegionIndex, keyboard_cnt = findBiggestRegionForColor(frame, h_keyboard_border_color, s_keyboard_border_color, v_keyboard_border_color, keyboard_threshold)
 
     # Zeichnet größte Region (Keyboard) weiß
     cv2.drawContours(keyboard_mask, keyboard_contours, keyboard_biggestRegionIndex, (255,255,255), cv2.FILLED)
@@ -328,6 +363,49 @@ while cap.isOpened():
 
     ###################### KNÖPFE #################################
 
+    ## Inner Keyboard
+    innerKeyboard_x, innerKeyboard_y, innerKeyboard_w, innerKeyboard_h = getInnerKeyboard(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size)
+    # cv2.rectangle(frame, (innerKeyboard_x, innerKeyboard_y), (innerKeyboard_x + innerKeyboard_w, innerKeyboard_y + innerKeyboard_h), color=(255, 0, 0), thickness=5)
+
+    keys = []
+    ## Weiße Tasten zeichnen
+    key0_x, key0_y, key0_w, key0_h = getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,0)
+    cv2.rectangle(frame, (key0_x, key0_y), (key0_x + key0_w, key0_y + key0_h), color=(0, 0, 255), thickness=2)
+
+    key1_x, key1_y, key1_w, key1_h = getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,1)
+    cv2.rectangle(frame, (key1_x, key1_y), (key1_x + key1_w, key1_y + key1_h), color=(0, 0, 255), thickness=2)
+
+    key2_x, key2_y, key2_w, key2_h = getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,2)
+    cv2.rectangle(frame, (key2_x, key2_y), (key2_x + key2_w, key2_y + key2_h), color=(0, 0, 255), thickness=2)
+
+    key3_x, key3_y, key3_w, key3_h = getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,3)
+    cv2.rectangle(frame, (key3_x, key3_y), (key3_x + key3_w, key3_y + key3_h), color=(0, 0, 255), thickness=2)
+
+    key4_x, key4_y, key4_w, key4_h = getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,4)
+    cv2.rectangle(frame, (key4_x, key4_y), (key4_x + key4_w, key4_y + key4_h), color=(0, 0, 255), thickness=2)
+
+    key5_x, key5_y, key5_w, key5_h = getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,5)
+    cv2.rectangle(frame, (key5_x, key5_y), (key5_x + key5_w, key5_y + key5_h), color=(0, 0, 255), thickness=2)
+
+    key6_x, key6_y, key6_w, key6_h = getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,6)
+    cv2.rectangle(frame, (key6_x, key6_y), (key6_x + key6_w, key6_y + key6_h), color=(0, 0, 255), thickness=2)
+
+    ## Schwarze Tasten zeichnen
+    blackKey0_x, blackKey0_y, blackKey0_w, blackKey0_h = getBlackKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,0)
+    cv2.rectangle(frame, (blackKey0_x, blackKey0_y), (blackKey0_x + blackKey0_w, blackKey0_y + blackKey0_h), color=(0, 255, 255), thickness=2)
+
+    blackKey1_x, blackKey1_y, blackKey1_w, blackKey1_h = getBlackKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,1)
+    cv2.rectangle(frame, (blackKey1_x, blackKey1_y), (blackKey1_x + blackKey1_w, blackKey1_y + blackKey1_h), color=(0, 255, 255), thickness=2)
+
+    blackKey2_x, blackKey2_y, blackKey2_w, blackKey2_h = getBlackKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,2)
+    cv2.rectangle(frame, (blackKey2_x, blackKey2_y), (blackKey2_x + blackKey2_w, blackKey2_y + blackKey2_h), color=(0, 255, 255), thickness=2)
+
+    blackKey3_x, blackKey3_y, blackKey3_w, blackKey3_h = getBlackKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,3)
+    cv2.rectangle(frame, (blackKey3_x, blackKey3_y), (blackKey3_x + blackKey3_w, blackKey3_y + blackKey3_h), color=(0, 255, 255), thickness=2)
+
+    blackKey4_x, blackKey4_y, blackKey4_w, blackKey4_h = getBlackKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size,4)
+    cv2.rectangle(frame, (blackKey4_x, blackKey4_y), (blackKey4_x + blackKey4_w, blackKey4_y + blackKey4_h), color=(0, 255, 255), thickness=2)
+    
     ## Volume Minus zeichnen
     volume_minus_x, volume_minus_y, volume_minus_w, volume_minus_h = getVolumeMinusRegion(keyboard_x,keyboard_y,pixel_size)
     cv2.rectangle(frame, (volume_minus_x, volume_minus_y), (volume_minus_x + volume_minus_w, volume_minus_y + volume_minus_h), color=(0, 255, 0), thickness=2)
@@ -336,7 +414,7 @@ while cap.isOpened():
     volume_plus_x, volume_plus_y, volume_plus_w, volume_plus_h = getVolumePlusRegion(keyboard_x,keyboard_y,pixel_size)
     cv2.rectangle(frame, (volume_plus_x, volume_plus_y), (volume_plus_x + volume_plus_w, volume_plus_y + volume_plus_h), color=(0, 255, 0), thickness=2)
 
-    ## Piano zeichnen
+    ## Piano (Button) zeichnen
     piano_x, piano_y, piano_w, piano_h = getPianoRegion(keyboard_x,keyboard_y,pixel_size)
     cv2.rectangle(frame, (piano_x, piano_y), (piano_x + piano_w, piano_y + piano_h), color=(0, 255, 0), thickness=2)
 
@@ -357,8 +435,19 @@ while cap.isOpened():
     finger_x = finger_upper_point[0]
     finger_y = finger_upper_point[1]
 
+    # Inner Keyboard
+    if (isFingerIn(finger_x, finger_y, innerKeyboard_x, innerKeyboard_y, innerKeyboard_w, innerKeyboard_h)):
+        # Wenn im inneren Keyboard, dann
+        # TODO
+        if (command != "Play Key"):
+            command = "Play Key"
+            commandStart = getMilliseconds()
+        elif isCommandTimeoutExceeded(commandStart):
+            print('Play Key')
+            # do something
+            command = 'none'
     # Volume Minus
-    if (isFingerIn(finger_x, finger_y, volume_minus_x, volume_minus_y, volume_minus_w, volume_minus_h)):
+    elif (isFingerIn(finger_x, finger_y, volume_minus_x, volume_minus_y, volume_minus_w, volume_minus_h)):
         if (command != "Volume Minus"):
             command = "Volume Minus"
             commandStart = getMilliseconds()
