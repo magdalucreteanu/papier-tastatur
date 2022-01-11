@@ -37,21 +37,23 @@ synth()
 // Quelle für Frequenzen/Halbtöne: https://de.wikipedia.org/wiki/Frequenzen_der_gleichstufigen_Stimmung
 noten =
 [
-  { "frequez" : "130.813", "halbton" : false, piano: "noten/key08.mp3" }, // C3
-  { "frequez" : "138.591", "halbton" : true, piano: "noten/key09.mp3" } , // C#3/Db3
-  { "frequez" : "146.832", "halbton" : false, piano: "noten/key10.mp3" }, // D3
-  { "frequez" : "155.563", "halbton" : true, piano: "noten/key11.mp3" },  // D#3/Eb3
-  { "frequez" : "164.814", "halbton" : false, piano: "noten/key12.mp3" }, // E3
-  { "frequez" : "174.614", "halbton" : false, piano: "noten/key13.mp3" }, // F3
-  { "frequez" : "184.997", "halbton" : true, piano: "noten/key14.mp3" },  // F#3/Gb3
-  { "frequez" : "195.998", "halbton" : false, piano: "noten/key15.mp3" }, // G3
-  { "frequez" : "207.652", "halbton" : true, piano: "noten/key16.mp3" },  // G#3/Ab3
-  { "frequez" : "220.000", "halbton" : false, piano: "noten/key17.mp3" }, // A3
-  { "frequez" : "233.082", "halbton" : true, piano: "noten/key18.mp3" },  // A#3/Bb3
-  { "frequez" : "246.942", "halbton" : false, piano: "noten/key19.mp3" }  // B3
+  { "id" : "whiteKey0", "frequez" : "130.813", "halbton" : false, piano: "noten/key08.mp3" }, // C3
+  { "id" : "blackKey0", "frequez" : "138.591", "halbton" : true, piano: "noten/key09.mp3" } , // C#3/Db3
+  { "id" : "whiteKey1", "frequez" : "146.832", "halbton" : false, piano: "noten/key10.mp3" }, // D3
+  { "id" : "blackKey1", "frequez" : "155.563", "halbton" : true, piano: "noten/key11.mp3" },  // D#3/Eb3
+  { "id" : "whiteKey2", "frequez" : "164.814", "halbton" : false, piano: "noten/key12.mp3" }, // E3
+  { "id" : "whiteKey3", "frequez" : "174.614", "halbton" : false, piano: "noten/key13.mp3" }, // F3
+  { "id" : "blackKey2", "frequez" : "184.997", "halbton" : true, piano: "noten/key14.mp3" },  // F#3/Gb3
+  { "id" : "whiteKey4", "frequez" : "195.998", "halbton" : false, piano: "noten/key15.mp3" }, // G3
+  { "id" : "blackKey3", "frequez" : "207.652", "halbton" : true, piano: "noten/key16.mp3" },  // G#3/Ab3
+  { "id" : "whiteKey5", "frequez" : "220.000", "halbton" : false, piano: "noten/key17.mp3" }, // A3
+  { "id" : "blackKey4", "frequez" : "233.082", "halbton" : true, piano: "noten/key18.mp3" },  // A#3/Bb3
+  { "id" : "whiteKey6", "frequez" : "246.942", "halbton" : false, piano: "noten/key19.mp3" }  // B3
 ]
 
 noten.forEach(note => {
+  // id des Buttons
+  var id = note.id
   // finde ob eine note ein Halbton ist oder nicht
   var halbton = ((note.halbton) ? " halbton" : "")
   // erstelle die Klasse dafür
@@ -61,7 +63,7 @@ noten.forEach(note => {
   // setze die Datei für die Klaviernote
   var piano = "piano='" + note.piano + "'"
   // die Note wird zum Element 'klavier' hinzugefügt
-  document.getElementById('klavier').innerHTML += "<button onClick='klickNote(this)' " + klasse + " " + frequenz + " " + piano + "</button>"
+  document.getElementById('klavier').innerHTML += "<button id='" + id + "' onClick='klickNote(this)' " + klasse + " " + frequenz + " " + piano + "</button>"
 })
 
 // ------------------------- EVENT LISTENER --------------------------------------------------------------------
@@ -172,13 +174,25 @@ function synth() {
   Array.from(pressedElements).forEach(pressedElement => klickNote(pressedElement))
 }
 
+// BlackKey
+function blackKey(obj) {
+  var pressedElement = document.getElementById('blackKey' + obj.index)
+  klickNote(pressedElement)
+}
+
+// WhiteKey
+function whiteKey(obj) {
+  var pressedElement = document.getElementById('whiteKey' + obj.index)
+  klickNote(pressedElement)
+}
+
 // Attack
 function attack(obj) {
   compressor.attack.value = (obj / 100);
   document.querySelector("#attackOutput").innerHTML = (obj / 100) + " sec";
 }
 
-// Attack
+// Release
 function release(obj) {
   compressor.release.value = (obj / 100);
   document.querySelector("#releaseOutput").innerHTML = (obj / 100) + " sec";
@@ -200,6 +214,12 @@ function websocketMessage(message) {
       break
     case 'synth':
       synth()
+      break
+    case 'whiteKey':
+      whiteKey(obj)
+      break
+    case 'blackKey':
+      blackKey(obj)
       break
     case 'attack':
       attack(obj)

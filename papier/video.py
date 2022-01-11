@@ -123,6 +123,24 @@ def synth():
     }
     sendMessage(data)
 
+# Sende blackKey Kommando über WebSocket
+def blackKey(index):
+    data = {
+        "timestamp": time.time(),
+        "name": "blackKey",
+        "index": index
+    }
+    sendMessage(data)
+
+# Sende whiteKey Kommando über WebSocket
+def whiteKey(index):
+    data = {
+        "timestamp": time.time(),
+        "name": "whiteKey",
+        "index": index
+    }
+    sendMessage(data)
+
 # Sende Attack Kommando über WebSocket
 def attack():
     data = {
@@ -421,25 +439,25 @@ while cap.isOpened():
         # Wenn im inneren Keyboard, dann erst schwarze Tasten überprüfen
         # Black Keys
         for x in range(5):
-            if (isFingerIn(finger_x, finger_x, blackKeys[x,0], blackKeys[x,1], blackKeys[x,2], blackKeys[x,3])):
+            if (isFingerIn(finger_x, finger_y, blackKeys[x,0], blackKeys[x,1], blackKeys[x,2], blackKeys[x,3])):
                 fingerOnBlackKey = True
                 if (command != "Play Black Key " + str(x)):
                     command = "Play Black Key " + str(x)
                     commandStart = getMilliseconds()
                 elif isCommandTimeoutExceeded(commandStart):
                     print('Play Black Key ' + str(x))
-                    # do something
+                    blackKey(x)
                     command = 'none'
         # White Keys
         if not fingerOnBlackKey: # Schwarze Tasten liegen im Bereich der weißen Tasten, deswegen erst sichergehen, dass keine schwarze Taste gedrückt wurde
             for y in range(7):
-                if (isFingerIn(finger_x, finger_x, whiteKeys[y,0], whiteKeys[y,1], whiteKeys[y,2], whiteKeys[y,3])):
+                if (isFingerIn(finger_x, finger_y, whiteKeys[y,0], whiteKeys[y,1], whiteKeys[y,2], whiteKeys[y,3])):
                     if (command != "Play White Key " + str(y)):
                         command = "Play White Key " + str(y)
                         commandStart = getMilliseconds()
                     elif isCommandTimeoutExceeded(commandStart):
                         print('Play White Key ' + str(y))
-                        # do something
+                        whiteKey(y)
                         command = 'none'
     # Volume Minus
     elif (isFingerIn(finger_x, finger_y, volume_minus_x, volume_minus_y, volume_minus_w, volume_minus_h)):
