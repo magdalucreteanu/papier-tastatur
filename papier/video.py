@@ -79,7 +79,7 @@ paper_release_h = 35
 
 
 # Callback Funktion für Slider - tut nichts
-def do_nothing():
+def do_nothing(no):
     return
 
 # ------------------------- WEB SOCKET  ---------------------------------------------------
@@ -162,6 +162,7 @@ def findBiggestRegionsForColor(frame, h, s, v, threshold, numberRegions):
     # Berechnet Fläche einer Region
     biggestRegion = 0
     biggestRegionIndex = 0
+    cnt = np.array([[0, 0]])
     for index in range(len(contours)):
         area = cv2.contourArea(contours[index])
         # Schwärzung aller Regionen
@@ -229,23 +230,42 @@ def isCommandTimeoutExceeded(commandStart):
     currentTime = getMilliseconds()
     return (currentTime - commandStart) > 1000
 
+def colorPicker(event,x,y,flags,param): 
+    global h_keyboard_border_color, s_keyboard_border_color, v_keyboard_border_color, h_finger_color, s_finger_color, v_finger_color
+    # Pixel an der Mausposition
+    pixel = frame[y, x]
+    pixel = np.array([[[pixel[0], pixel[1], pixel[2]]]])
+    color_HSV = cv2.cvtColor(pixel, cv2.COLOR_BGR2HSV)
+
+    # Linksklick passt die Farbe des Tastaturrands an
+    if event == cv2.EVENT_LBUTTONDOWN:
+        h_keyboard_border_color = int(color_HSV[0][0][0])
+        s_keyboard_border_color = int(color_HSV[0][0][1])
+        v_keyboard_border_color = int(color_HSV[0][0][2])
+    #Rechtsklick passt die Farbe der Hand an
+    elif event == cv2.EVENT_RBUTTONDOWN:
+        h_finger_color = int(color_HSV[0][0][0])
+        s_finger_color = int(color_HSV[0][0][1])
+        v_finger_color = int(color_HSV[0][0][2])
+
+
 # ------------------------- VIDEO  --------------------------------------------------------
 
 # Named Window Tastatur erstellen
 cv2.namedWindow("Tastatur")
 # Tracker in Tastatur Window erstellen
-cv2.createTrackbar("Threshold", "Tastatur", 80, 100, do_nothing)
+cv2.createTrackbar("ThresholdTastatur", "Tastatur", 80, 100, do_nothing)
 
 # Named Window Finger erstellen
 cv2.namedWindow("Finger")
 # Tracker in Finger Window erstellen
-cv2.createTrackbar("Threshold", "Finger", 75, 100, do_nothing)
+cv2.createTrackbar("ThresholdFinger", "Finger", 75, 100, do_nothing)
 
 #Video aus Datei öffnen
-cap = cv2.VideoCapture('../media/Papiertastatur_MitFinger.mp4')
+#cap = cv2.VideoCapture('../media/Papiertastatur_MitFinger.mp4')
 
 # Live Video
-#cap=cv2.VideoCapture(0)
+cap=cv2.VideoCapture(0)
 
 # Zeitstempel für die Finger Kommandos
 commandStart = getMilliseconds()
@@ -254,30 +274,32 @@ while cap.isOpened():
     ret, frame = cap.read()
 
     # Skaling (für mp4-Video)
-    frame = cv2.resize(frame, (960, 540)) 
+    #frame = cv2.resize(frame, (960, 540)) 
 
     # Original Video anzeigen
     cv2.imshow('Original', frame)
 
+    cv2.setMouseCallback("Original", colorPicker)
+
     ###################### FINGER #################################
 
     # Threshold Wert aus Tracker lesen
-    finger_threshold = cv2.getTrackbarPos('Threshold', 'Finger')
+    finger_threshold = cv2.getTrackbarPos('ThresholdFinger', 'Finger')
     # Finger Rand finden
     finger_mask, finger_contours, finger_biggestRegionIndex, finger_cnt = findBiggestRegionsForColor(frame, h_finger_color, s_finger_color, v_finger_color, finger_threshold, 1)
     # Zeichnet größte Region (Finger) weiß
     cv2.drawContours(finger_mask, finger_contours, finger_biggestRegionIndex, (255,255,255), cv2.FILLED)
     # Finger zeichnen
     # wir finden die Spitze des Fingers (das ist die Top Y Koordinate)
-    finger_upper_point = finger_cnt[finger_cnt[:, :, 1].argmin()][0]
+    finger_upper_point = tuple(finger_cnt[finger_cnt[:,:,1].argmin()][0])
     # und wir zeichnen einen Kreis. Dafür erxtrahieren wir den Radius der Finger, sodass unser Kreis über den Finger liegt
-    finger_upper_point[1] = finger_upper_point[1] + finger_radius
-    cv2.circle(frame, tuple(finger_upper_point), finger_radius, (0, 0, 255), -1)
+    #finger_upper_point[1] = finger_upper_point[1] + finger_radius
+    cv2.circle(frame, finger_upper_point, finger_radius, (0, 0, 255), -1)
 
     ###################### KEYBOARD #################################
 
     # Threshold Wert aus Tracker lesen
-    keyboard_threshold = cv2.getTrackbarPos('Threshold', 'Tastatur')
+    keyboard_threshold = cv2.getTrackbarPos('ThresholdTastatur', 'Tastatur')
     # Keyboard Rand finden
     keyboard_mask, keyboard_contours, keyboard_biggestRegionIndex, keyboard_cnt = findBiggestRegionsForColor(frame, h_keyboard_border_color, s_keyboard_border_color, v_keyboard_border_color, keyboard_threshold, 1)
 
