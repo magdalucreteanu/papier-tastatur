@@ -73,6 +73,8 @@ paper_release_w = 282
 paper_release_h = 35
 
 command = 'none'
+savedXKeyboard = 0
+savedWKeyboard = 0
 
 # Callback Funktion für Slider - tut nichts
 def do_nothing(no):
@@ -367,7 +369,7 @@ while cap.isOpened():
     # keyboard_box_y = keyboard_box[0][1]
     # keyboard_box_w = keyboard_rect[1][0]
     # keyboard_box_h = keyboard_rect[1][1]
-    cv2.drawContours(frame,[keyboard_box],0,(255,0,255),2)
+    # cv2.drawContours(frame,[keyboard_box],0,(255,0,255),2)
     # Hiermit kann später die Tastatur genauer erfasst werden, auch wenn sie gedreht ist
 
     # Keyboard zeichnen
@@ -378,11 +380,18 @@ while cap.isOpened():
     if (keyboard_w < 2 * keyboard_h):
         # Teil der Tastatur ist von Hand abgedeckt und muss richtig berechnete werden
         # Shift nach Rechts für X
-        keyboard_x = keyboard_x + keyboard_w
+        #keyboard_x = keyboard_x + keyboard_w
         # neues Width berechnen
-        keyboard_w = int(2.05 * keyboard_h)
+        #keyboard_w = int(2.05 * keyboard_h)
         # Shift nach Links für X
-        keyboard_x = keyboard_x - keyboard_w
+        #keyboard_x = keyboard_x - keyboard_w
+        keyboard_x = savedXKeyboard
+        keyboard_w = savedWKeyboard
+    else:
+        if(savedWKeyboard != keyboard_w or savedXKeyboard != keyboard_x):
+            savedXKeyboard = keyboard_x
+            savedWKeyboard = keyboard_w
+
     cv2.rectangle(frame, (keyboard_x, keyboard_y), (keyboard_x + keyboard_w, keyboard_y + keyboard_h), color=(0, 255, 0), thickness=2)
 
     ###################### PIXEL GRÖßE #################################
