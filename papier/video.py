@@ -72,6 +72,7 @@ paper_release_upper_y = 1144
 paper_release_w = 282
 paper_release_h = 35
 
+command = 'none'
 
 # Callback Funktion für Slider - tut nichts
 def do_nothing(no):
@@ -307,10 +308,11 @@ cv2.createTrackbar("ThresholdTastatur", "Tastatur", 80, 100, do_nothing)
 # Named Window Finger erstellen
 cv2.namedWindow("Finger")
 # Tracker in Finger Window erstellen
-cv2.createTrackbar("ThresholdFinger", "Finger", 75, 100, do_nothing)
+cv2.createTrackbar("ThresholdFinger", "Finger", 70, 100, do_nothing)
 
-#Video aus Datei öffnen
-cap = cv2.VideoCapture('../media/Papiertastatur_MitFinger.mp4')
+# Video aus Datei öffnen
+# cap = cv2.VideoCapture('../media/Papiertastatur_MitFinger.mp4')
+cap = cv2.VideoCapture('../media/TastaturOhneAR.mp4')
 
 # Live Video
 #cap=cv2.VideoCapture(0)
@@ -321,8 +323,8 @@ while cap.isOpened():
     ret, frame = cap.read()
 
     # Skaling (für mp4-Video)
-    frame = cv2.resize(frame, (960, 540)) 
-
+    frame = cv2.resize(frame, (960, 540))
+    
     # Original Video anzeigen
     cv2.imshow('Original', frame)
 
