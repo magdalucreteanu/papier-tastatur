@@ -11,11 +11,6 @@ h_keyboard_border_color = int(keyboard_border_color_HSV[0][0][0])
 s_keyboard_border_color = int(keyboard_border_color_HSV[0][0][1])
 v_keyboard_border_color = int(keyboard_border_color_HSV[0][0][2])
 
-# Für Halbtöne Klaviertasten und die Controls
-h_black = int(0)
-s_black = int(0)
-v_black = int(0)
-
 # ausgewählter Pixel für den Finger
 finger_color = cv2.imread('../media/Finger_Farbe.jpg',cv2.IMREAD_COLOR )
 finger_color_HSV = cv2.cvtColor(finger_color, cv2.COLOR_BGR2HSV)
@@ -357,6 +352,21 @@ while cap.isOpened():
 
     # Zeichnet größte Region (Keyboard) weiß
     cv2.drawContours(keyboard_mask, keyboard_contours, keyboard_biggestRegionIndex, (255,255,255), cv2.FILLED)
+
+    # Rotiertes Keyboard
+    # Here, bounding rectangle is drawn with minimum area, so it considers the rotation also. 
+    # The function used is cv.minAreaRect(). It returns a Box2D structure which contains 
+    # following details - ( center (x,y), (width, height), angle of rotation ). 
+    # But to draw this rectangle, we need 4 corners of the rectangle. It is obtained by the function cv.boxPoints()
+    keyboard_rect = cv2.minAreaRect(keyboard_cnt)
+    keyboard_box = cv2.boxPoints(keyboard_rect)
+    keyboard_box = np.int0(keyboard_box)
+    # keyboard_box_x = keyboard_box[0][0]
+    # keyboard_box_y = keyboard_box[0][1]
+    # keyboard_box_w = keyboard_rect[1][0]
+    # keyboard_box_h = keyboard_rect[1][1]
+    cv2.drawContours(frame,[keyboard_box],0,(255,0,255),2)
+    # Hiermit kann später die Tastatur genauer erfasst werden, auch wenn sie gedreht ist
 
     # Keyboard zeichnen
     keyboard_x,keyboard_y,keyboard_w,keyboard_h = cv2.boundingRect(keyboard_cnt)
