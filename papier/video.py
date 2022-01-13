@@ -60,11 +60,11 @@ paper_synth_upper_y = 1095
 paper_synth_w = 89
 paper_synth_h = 89
 
-# Attack
-paper_attack_upper_x = 624
-paper_attack_upper_y = 1075
-paper_attack_w = 282
-paper_attack_h = 35
+# Distortion
+paper_distortion_upper_x = 624
+paper_distortion_upper_y = 1075
+paper_distortion_w = 282
+paper_distortion_h = 35
 
 # Release
 paper_release_upper_x = 624
@@ -139,12 +139,12 @@ def whiteKey(index):
     }
     sendMessage(data)
 
-# Sende Attack Kommando über WebSocket
-def attack():
+# Sende distortion Kommando über WebSocket
+def distortion():
     data = {
         "timestamp": time.time(),
-        "name": "attack"
-        # TODO - Attack Kontrolparameter hier
+        "name": "distortion"
+        # TODO - distortion Kontrolparameter hier
     }
     sendMessage(data)
 
@@ -253,12 +253,12 @@ def getSynthRegion(keyboard_x,keyboard_y,pixel_size):
     synth_h = pixel_size * paper_synth_h
     return int(synth_x), int(synth_y), int(synth_w), int(synth_h)
 
-def getAttackRegion(keyboard_x,keyboard_y,pixel_size):
-    attack_x = keyboard_x + pixel_size * (paper_attack_upper_x -  paper_outer_margin_upper_x)
-    attack_y = keyboard_y + pixel_size * (paper_attack_upper_y - paper_outer_margin_upper_y)
-    attack_w = pixel_size * paper_attack_w
-    attack_h = pixel_size * paper_attack_h
-    return int(attack_x), int(attack_y), int(attack_w), int(attack_h)
+def getdistortionRegion(keyboard_x,keyboard_y,pixel_size):
+    distortion_x = keyboard_x + pixel_size * (paper_distortion_upper_x -  paper_outer_margin_upper_x)
+    distortion_y = keyboard_y + pixel_size * (paper_distortion_upper_y - paper_outer_margin_upper_y)
+    distortion_w = pixel_size * paper_distortion_w
+    distortion_h = pixel_size * paper_distortion_h
+    return int(distortion_x), int(distortion_y), int(distortion_w), int(distortion_h)
 
 def getReleaseRegion(keyboard_x,keyboard_y,pixel_size):
     release_x = keyboard_x + pixel_size * (paper_release_upper_x -  paper_outer_margin_upper_x)
@@ -443,9 +443,9 @@ while cap.isOpened():
             synth_x, synth_y, synth_w, synth_h = getSynthRegion(keyboard_x,keyboard_y,pixel_size)
             cv2.rectangle(frame, (synth_x, synth_y), (synth_x + synth_w, synth_y + synth_h), color=(0, 255, 0), thickness=2)
 
-            ## Attack zeichnen
-            attack_x, attack_y, attack_w, attack_h = getAttackRegion(keyboard_x,keyboard_y,pixel_size)
-            cv2.rectangle(frame, (attack_x, attack_y), (attack_x + attack_w, attack_y + attack_h), color=(0, 255, 0), thickness=2)
+            ## distortion zeichnen
+            distortion_x, distortion_y, distortion_w, distortion_h = getdistortionRegion(keyboard_x,keyboard_y,pixel_size)
+            cv2.rectangle(frame, (distortion_x, distortion_y), (distortion_x + distortion_w, distortion_y + distortion_h), color=(0, 255, 0), thickness=2)
 
             ## Release zeichnen
             release_x, release_y, release_w, release_h = getReleaseRegion(keyboard_x,keyboard_y,pixel_size)
@@ -518,14 +518,14 @@ while cap.isOpened():
                     print('Synth')
                     synth()
                     command = 'none'
-            # Attack
-            elif (isFingerIn(finger_x, finger_y, attack_x, attack_y, attack_w, attack_h)):
-                if (command != "Attack"):
-                    command = "Attack"
+            # distortion
+            elif (isFingerIn(finger_x, finger_y, distortion_x, distortion_y, distortion_w, distortion_h)):
+                if (command != "distortion"):
+                    command = "distortion"
                     commandStart = getMilliseconds()
                 elif isCommandTimeoutExceeded(commandStart):
-                    print('Attack')
-                    attack()
+                    print('distortion')
+                    distortion()
                     command = 'none'
             # Release
             elif (isFingerIn(finger_x, finger_y, release_x, release_y, release_w, release_h)):

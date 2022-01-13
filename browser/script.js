@@ -24,14 +24,17 @@ websocket.onerror = function(e) {
 
 // ------------------------- WEB AUDIO INITIALISIEREN ------------------------------------------------------
 
-// Spielt synth falls true, ansonsten spielt Klavier
-var isSynth = true
+var isSynth
 
 // WebAudio context erstellen
 var audioContext = new (window.AudioContext || window.webkitAudioContext)();
 var oscillatorNode = audioContext.createOscillator()
 var gainNode = audioContext.createGain()
 let compressor = audioContext.createDynamicsCompressor();
+let distortionNode = audioContext.createWaveShaper();
+distortionNode.curve = makeDistortionCurve(0);
+distortionNode.oversample = "4x";
+
 synth()
 
 // Quelle für Frequenzen/Halbtöne: https://de.wikipedia.org/wiki/Frequenzen_der_gleichstufigen_Stimmung
@@ -68,8 +71,8 @@ noten.forEach(note => {
 
 // ------------------------- EVENT LISTENER --------------------------------------------------------------------
 
-document.querySelector("#attackSlider").addEventListener("mousemove", function(e) {
-  attack(this.value);
+document.querySelector("#distortionSlider").addEventListener("mousemove", function(e) {
+  distortion(this.value);
 });
 
 document.querySelector("#releaseSlider").addEventListener("mousemove", function(e) {
@@ -77,6 +80,20 @@ document.querySelector("#releaseSlider").addEventListener("mousemove", function(
 });
 
 // ------------------------- FUNKTIONEN --------------------------------------------------------------------
+
+function makeDistortionCurve(amount) {
+  var n_samples = 44100,
+      curve = new Float32Array(n_samples);
+
+  var test = [];
+
+  for (i = 0; i < n_samples; i++ ) {
+      var x = i * 2 / n_samples - 1;
+      curve[i] = (Math.PI + amount) * x / (Math.PI + (amount * Math.abs(x)));
+  }
+
+  return curve;
+};
 
 function resetPressedElements() {
   // Finde die aktuell gedrückten Tasten und entferne die 'pressed' CSS
@@ -105,8 +122,8 @@ function klickNote(element) {
     .then(audioBuffer => {
       const source = audioContext.createBufferSource();
       source.buffer = audioBuffer;
-      source.connect(compressor);
-      compressor.connect(gainNode);
+      source.connect(distortionNode);
+      distortionNode.connect(gainNode);
       gainNode.connect(audioContext.destination);
       source.start();
     });
@@ -133,6 +150,10 @@ function volumePlus() {
 
 // Piano
 function piano() {
+  if (isSynth === false) {
+    return
+  }
+
   isSynth = false
 
   // Piano Button ist disabled
@@ -150,6 +171,10 @@ function piano() {
 
 // Synth
 function synth() {
+  if (isSynth === true) {
+    return
+  }
+
   isSynth = true
 
   // Piano Button ist enabled
@@ -162,8 +187,8 @@ function synth() {
   oscillatorNode.frequency.value = 0
   // sofort starten
   oscillatorNode.start(0)
-  oscillatorNode.connect(compressor)
-  compressor.connect(gainNode)
+  oscillatorNode.connect(distortionNode)
+  distortionNode.connect(gainNode)
 
   // Gain Node konfigurieren
   gainNode.gain.value = 0.5
@@ -186,14 +211,15 @@ function whiteKey(obj) {
   klickNote(pressedElement)
 }
 
-// Attack
-function attack(obj) {
-  compressor.attack.value = (obj / 100);
-  document.querySelector("#attackOutput").innerHTML = (obj / 100) + " sec";
+// Distortion
+function distortion(obj) {
+  distortionNode.curve = makeDistortionCurve(obj);
+  document.querySelector("#distortionOutput").innerHTML = obj;
 }
 
 // Release
 function release(obj) {
+  console.log('release: ' + obj)
   compressor.release.value = (obj / 100);
   document.querySelector("#releaseOutput").innerHTML = (obj / 100) + " sec";
 }
@@ -221,8 +247,8 @@ function websocketMessage(message) {
     case 'blackKey':
       blackKey(obj)
       break
-    case 'attack':
-      attack(obj)
+    case 'distortion':
+      distortion(obj)
       break
     case 'release':
       release(obj)
