@@ -21,7 +21,6 @@ websocket.onerror = function(e) {
   console.log(e)
 };
 
-
 // ------------------------- WEB AUDIO INITIALISIEREN ------------------------------------------------------
 
 var isSynth
@@ -30,12 +29,15 @@ var isSynth
 var audioContext = new (window.AudioContext || window.webkitAudioContext)();
 var oscillatorNode = audioContext.createOscillator()
 var gainNode = audioContext.createGain()
-let compressor = audioContext.createDynamicsCompressor();
+gainNode.gain.value = 0.5
+let convolverNode = audioContext.createConvolver();
 let distortionNode = audioContext.createWaveShaper();
 distortionNode.curve = makeDistortionCurve(0);
 distortionNode.oversample = "4x";
 
+loadImpulseResponse("room");
 synth()
+
 
 // Quelle für Frequenzen/Halbtöne: https://de.wikipedia.org/wiki/Frequenzen_der_gleichstufigen_Stimmung
 noten =
@@ -75,29 +77,55 @@ document.querySelector("#distortionSlider").addEventListener("mousemove", functi
   distortion(this.value);
 });
 
-document.querySelector("#releaseSlider").addEventListener("mousemove", function(e) {
-  release(this.value);
-});
-
 // ------------------------- FUNKTIONEN --------------------------------------------------------------------
+
+function loadImpulseResponse(name) {
+  // Buttons enablen
+  document.getElementById("cave").disabled = false
+  document.getElementById("church").disabled = false
+  document.getElementById("garage").disabled = false
+  document.getElementById("room").disabled = false
+
+  // Den aktiven Button disablen
+  document.getElementById(name).disabled = true
+
+  // Reverb laden
+  var request = new XMLHttpRequest()
+  request.open("GET",  ("/impulseResponses/" + name + ".wav"), true)
+  request.responseType = "arraybuffer"
+
+  request.onload = function () {
+      var undecodedAudio = request.response
+      audioContext.decodeAudioData(undecodedAudio, function (buffer) {
+          if (convolverNode) {convolverNode.disconnect() }
+          convolverNode = audioContext.createConvolver()
+          convolverNode.buffer = buffer
+          convolverNode.normalize = true
+
+          gainNode.connect(convolverNode)
+          convolverNode.connect(audioContext.destination)
+      })
+  }
+  request.send()
+}
 
 function makeDistortionCurve(amount) {
   var n_samples = 44100,
-      curve = new Float32Array(n_samples);
+      curve = new Float32Array(n_samples)
 
-  var test = [];
+  var test = []
 
   for (i = 0; i < n_samples; i++ ) {
-      var x = i * 2 / n_samples - 1;
-      curve[i] = (Math.PI + amount) * x / (Math.PI + (amount * Math.abs(x)));
+      var x = i * 2 / n_samples - 1
+      curve[i] = (Math.PI + amount) * x / (Math.PI + (amount * Math.abs(x)))
   }
 
-  return curve;
+  return curve
 };
 
 function resetPressedElements() {
   // Finde die aktuell gedrückten Tasten und entferne die 'pressed' CSS
-  var pressedElements = document.getElementsByClassName('pressed');
+  var pressedElements = document.getElementsByClassName('pressed')
   // pressedElements ist eine HTMLCollection, wir müssen diese in Array konvertieren
   Array.from(pressedElements).forEach(pressedElement => pressedElement.classList.remove('pressed'))
 }
@@ -123,8 +151,10 @@ function klickNote(element) {
       const source = audioContext.createBufferSource();
       source.buffer = audioBuffer;
       source.connect(distortionNode);
-      distortionNode.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      distortionNode.connect(gainNode)
+      //gainNode.connect(convolverNode)
+      //convolverNode(audioContext.destination);
+      gainNode.connect(audioContext.destination)
       source.start();
     });
   }
@@ -191,11 +221,11 @@ function synth() {
   distortionNode.connect(gainNode)
 
   // Gain Node konfigurieren
-  gainNode.gain.value = 0.5
-  gainNode.connect(audioContext.destination)
+  gainNode.connect(convolverNode)
+  convolverNode.connect(audioContext.destination)
   
   // Ausgewählte Taste wieder drücken
-  var pressedElements = document.getElementsByClassName('pressed');
+  var pressedElements = document.getElementsByClassName('pressed')
   Array.from(pressedElements).forEach(pressedElement => klickNote(pressedElement))
 }
 
@@ -213,15 +243,28 @@ function whiteKey(obj) {
 
 // Distortion
 function distortion(obj) {
-  distortionNode.curve = makeDistortionCurve(obj);
-  document.querySelector("#distortionOutput").innerHTML = obj;
+  distortionNode.curve = makeDistortionCurve(obj)
+  document.querySelector("#distortionOutput").innerHTML = obj
 }
 
-// Release
-function release(obj) {
-  console.log('release: ' + obj)
-  compressor.release.value = (obj / 100);
-  document.querySelector("#releaseOutput").innerHTML = (obj / 100) + " sec";
+// Cave
+function cave() {
+  loadImpulseResponse('cave')
+}
+
+// Church
+function church() {
+  loadImpulseResponse('church')
+}
+
+// Garage
+function garage() {
+  loadImpulseResponse('garage')
+}
+
+// Room
+function room() {
+  loadImpulseResponse('room')
 }
 
 // Eine neue Meldung kamm über WebSocket

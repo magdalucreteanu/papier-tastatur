@@ -18,10 +18,12 @@
             <input type="range" min="0" max="20" value="10" class="slider" id="distortionSlider">
             <span id="distortionOutput">0</span>
           </div>
-          <div id="releaseContainer">Release
-            <input type="range" min="0" max="100" value="10" class="slider" id="releaseSlider">
-            <span id="releaseOutput">0.1 sec</span>
-          </div>
+          <div id="reverbContainer">Reverb
+            <button id="cave" onClick='cave()'>Cave</button>
+            <button id="church" onClick='church()'>Church</button>
+            <button id="garage" onClick='garage()'>Garage</button>
+            <button id="room" onClick='room()'>Room</button>
+            </div>
         </div>
     </div>
     <div id="klavier" class="klavier">

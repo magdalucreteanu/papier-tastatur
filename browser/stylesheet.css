@@ -75,7 +75,7 @@ button {
   border: none;
   font-size: 2vw;
 }
-#minus, #plus{
+#minus, #plus {
   padding: 5%;
   background-color: darkgray;
   color: black;
@@ -92,6 +92,11 @@ button {
 
 /*Ring um zuketzt ausgewählten Button*/
 #piano:disabled, #synth:disabled{
+  border: 1vw solid darkred;
+}
+
+/*Ring um zuketzt ausgewählten Button*/
+#cave:disabled, #church:disabled, #garage:disabled, #room:disabled{
   border: 1vw solid darkred;
 }
 
