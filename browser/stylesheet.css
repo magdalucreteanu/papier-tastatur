@@ -13,7 +13,7 @@ html, body {
   display: inline-block;
   padding: 0;
   box-sizing: border-box;
-  border: 10px solid darkred;
+  border: 10px solid green;
   width: 80vw;
   height: 35vw}
 
@@ -92,12 +92,12 @@ button {
 
 /*Ring um zuketzt ausgewählten Button*/
 #piano:disabled, #synth:disabled{
-  border: 1vw solid darkred;
+  border: 1vw solid green;
 }
 
 /*Ring um zuketzt ausgewählten Button*/
 #cave:disabled, #church:disabled, #garage:disabled, #room:disabled{
-  border: 1vw solid darkred;
+  border: 1vw solid green;
 }
 
 /*Slider*/

@@ -5,7 +5,7 @@ import time
 import numpy as np
 
 # ausgewählter Pixel für den Tastaturrand
-keyboard_border_color = cv2.imread('../media/Alt_Tastaturrand_Farbe.jpg',cv2.IMREAD_COLOR )
+keyboard_border_color = cv2.imread('../media/Tastaturrand_Farbe.jpg',cv2.IMREAD_COLOR )
 keyboard_border_color_HSV = cv2.cvtColor(keyboard_border_color, cv2.COLOR_BGR2HSV)
 h_keyboard_border_color = int(keyboard_border_color_HSV[0][0][0])
 s_keyboard_border_color = int(keyboard_border_color_HSV[0][0][1])
@@ -63,14 +63,14 @@ paper_synth_h = 89
 # Distortion
 paper_distortion_upper_x = 624
 paper_distortion_upper_y = 1075
-paper_distortion_w = 282
+paper_distortion_w = 304
 paper_distortion_h = 35
 
-# Release
-paper_release_upper_x = 624
-paper_release_upper_y = 1144
-paper_release_w = 282
-paper_release_h = 35
+# Reverb
+paper_reverb_upper_x = 624
+paper_reverb_upper_y = 1135
+paper_reverb_w = 304
+paper_reverb_h = 50
 
 command = 'none'
 savedXKeyboard = 0
@@ -149,11 +149,11 @@ def distortion():
     sendMessage(data)
 
 # Sende Release Kommando über WebSocket
-def release():
+def reverb(index):
     data = {
         "timestamp": time.time(),
-        "name": "release"
-        # TODO - Release Kontrolparameter hier
+        "name": "reverb",
+        "index": index
     }
     sendMessage(data)
 
@@ -253,19 +253,27 @@ def getSynthRegion(keyboard_x,keyboard_y,pixel_size):
     synth_h = pixel_size * paper_synth_h
     return int(synth_x), int(synth_y), int(synth_w), int(synth_h)
 
-def getdistortionRegion(keyboard_x,keyboard_y,pixel_size):
+def getDistortionRegion(keyboard_x,keyboard_y,pixel_size):
     distortion_x = keyboard_x + pixel_size * (paper_distortion_upper_x -  paper_outer_margin_upper_x)
     distortion_y = keyboard_y + pixel_size * (paper_distortion_upper_y - paper_outer_margin_upper_y)
     distortion_w = pixel_size * paper_distortion_w
     distortion_h = pixel_size * paper_distortion_h
     return int(distortion_x), int(distortion_y), int(distortion_w), int(distortion_h)
 
-def getReleaseRegion(keyboard_x,keyboard_y,pixel_size):
-    release_x = keyboard_x + pixel_size * (paper_release_upper_x -  paper_outer_margin_upper_x)
-    release_y = keyboard_y + pixel_size * (paper_release_upper_y - paper_outer_margin_upper_y)
-    release_w = pixel_size * paper_release_w
-    release_h = pixel_size * paper_release_h
-    return int(release_x), int(release_y), int(release_w), int(release_h)
+def getReverbFullRegion(keyboard_x,keyboard_y,pixel_size ):
+    reverb_x = keyboard_x + pixel_size * (paper_reverb_upper_x -  paper_outer_margin_upper_x)
+    reverb_y = keyboard_y + pixel_size * (paper_reverb_upper_y - paper_outer_margin_upper_y)
+    reverb_w = pixel_size * paper_reverb_w
+    reverb_h = pixel_size * paper_reverb_h
+    return int(reverb_x), int(reverb_y), int(reverb_w), int(reverb_h)
+
+def getReverbRegion(keyboard_x,keyboard_y,pixel_size, reverb_number):
+    reverb_x = keyboard_x + pixel_size * (paper_reverb_upper_x -  paper_outer_margin_upper_x)
+    reverb_y = keyboard_y + pixel_size * (paper_reverb_upper_y - paper_outer_margin_upper_y)
+    reverb_w = pixel_size * (paper_reverb_w / 4)
+    reverb_h = pixel_size * paper_reverb_h
+    reverb_x = reverb_x + (reverb_number ) * reverb_w 
+    return int(reverb_x), int(reverb_y), int(reverb_w), int(reverb_h)
 
 def isFingerIn(finger_x, finger_y, rectangle_x, rectangle_y, rectangle_w, rectangle_h):
     return (rectangle_x < finger_x) and (finger_x < rectangle_x + rectangle_w) and (rectangle_y < finger_y) and (finger_y < rectangle_y + rectangle_h)
@@ -305,19 +313,20 @@ def colorPicker(event,x,y,flags,param):
 # Named Window Tastatur erstellen
 cv2.namedWindow("Tastatur")
 # Tracker in Tastatur Window erstellen
-cv2.createTrackbar("ThresholdTastatur", "Tastatur", 80, 100, do_nothing)
+cv2.createTrackbar("ThresholdTastatur", "Tastatur", 120, 120, do_nothing)
 
 # Named Window Finger erstellen
 cv2.namedWindow("Finger")
 # Tracker in Finger Window erstellen
-cv2.createTrackbar("ThresholdFinger", "Finger", 70, 100, do_nothing)
+cv2.createTrackbar("ThresholdFinger", "Finger", 70, 120, do_nothing)
 
 # Video aus Datei öffnen
 # cap = cv2.VideoCapture('../media/Alt_Papiertastatur_MitFinger.mp4')
-cap = cv2.VideoCapture('../media/Alt_TastaturOhneAR.mp4')
+# cap = cv2.VideoCapture('../media/Alt_TastaturOhneAR.mp4')
+cap = cv2.VideoCapture('../media/TastaturOhneFinger.mp4')
 
 # Live Video
-#cap=cv2.VideoCapture(0)
+# cap=cv2.VideoCapture(0)
 
 # Zeitstempel für die Finger Kommandos
 commandStart = getMilliseconds()
@@ -443,14 +452,24 @@ while cap.isOpened():
             synth_x, synth_y, synth_w, synth_h = getSynthRegion(keyboard_x,keyboard_y,pixel_size)
             cv2.rectangle(frame, (synth_x, synth_y), (synth_x + synth_w, synth_y + synth_h), color=(0, 255, 0), thickness=2)
 
-            ## distortion zeichnen
-            distortion_x, distortion_y, distortion_w, distortion_h = getdistortionRegion(keyboard_x,keyboard_y,pixel_size)
+            ## Distortion zeichnen
+            distortion_x, distortion_y, distortion_w, distortion_h = getDistortionRegion(keyboard_x,keyboard_y,pixel_size)
             cv2.rectangle(frame, (distortion_x, distortion_y), (distortion_x + distortion_w, distortion_y + distortion_h), color=(0, 255, 0), thickness=2)
 
-            ## Release zeichnen
-            release_x, release_y, release_w, release_h = getReleaseRegion(keyboard_x,keyboard_y,pixel_size)
-            cv2.rectangle(frame, (release_x, release_y), (release_x + release_w, release_y + release_h), color=(0, 255, 0), thickness=2)
+            ## Full Reverb Region
+            reverb_x, reverb_y, reverb_w, reverb_h = getReverbFullRegion(keyboard_x,keyboard_y,pixel_size)
+            # cv2.rectangle(frame, (reverb_x, reverb_y), (reverb_x + reverb_w, reverb_y + reverb_h), color=(255, 255, 0), thickness=2)
 
+            ## Reverb zeichnen
+            reverbButtons = np.zeros(shape=(4,4))
+            for z in range(4):
+                button_x, button_y, button_w, button_h = getReverbRegion(keyboard_x,keyboard_y,pixel_size,z)
+                reverbButtons[z,0] = button_x 
+                reverbButtons[z,1] = button_y 
+                reverbButtons[z,2] = button_w
+                reverbButtons[z,3] = button_h
+                cv2.rectangle(frame, (button_x, button_y), (button_x + button_w, button_y + button_h), color=(0, 255, 0), thickness=2)
+            
             ###################### PRÜFE WELCHES ELEMENT WURDE GEDRÜCKT #################################
 
             finger_x = finger_upper_point[0]
@@ -527,15 +546,17 @@ while cap.isOpened():
                     print('distortion')
                     distortion()
                     command = 'none'
-            # Release
-            elif (isFingerIn(finger_x, finger_y, release_x, release_y, release_w, release_h)):
-                if (command != "Release"):
-                    command = "Release"
-                    commandStart = getMilliseconds()
-                elif isCommandTimeoutExceeded(commandStart):
-                    print('Release')
-                    release()
-                    command = 'none'
+            # Reverb
+            elif (isFingerIn(finger_x, finger_y, reverb_x, reverb_y, reverb_w, reverb_h)):
+                for x in range(4):
+                    if (isFingerIn(finger_x, finger_y, reverbButtons[x,0], reverbButtons[x,1], reverbButtons[x,2], reverbButtons[x,3])):
+                        if (command != "Reverb " + str(x)):
+                            command = "Reverb " + str(x)
+                            commandStart = getMilliseconds()
+                        elif isCommandTimeoutExceeded(commandStart):
+                            print('Reverb ' + str(x))
+                            reverb(x)
+                            command = 'none'
             else:
                 command = 'none'
 
