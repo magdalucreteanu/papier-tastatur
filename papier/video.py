@@ -62,9 +62,9 @@ paper_synth_h = 89
 
 # Distortion
 paper_distortion_upper_x = 624
-paper_distortion_upper_y = 1075
+paper_distortion_upper_y = 1065
 paper_distortion_w = 304
-paper_distortion_h = 35
+paper_distortion_h = 45
 
 # Reverb
 paper_reverb_upper_x = 624
@@ -139,16 +139,16 @@ def whiteKey(index):
     }
     sendMessage(data)
 
-# Sende distortion Kommando über WebSocket
-def distortion():
+# Sende Distortion Kommando über WebSocket
+def distortion(value):
     data = {
         "timestamp": time.time(),
-        "name": "distortion"
-        # TODO - distortion Kontrolparameter hier
+        "name": "distortion",
+        "value": value
     }
     sendMessage(data)
 
-# Sende Release Kommando über WebSocket
+# Sende Reverb Kommando über WebSocket
 def reverb(index):
     data = {
         "timestamp": time.time(),
@@ -323,7 +323,7 @@ cv2.createTrackbar("ThresholdFinger", "Finger", 70, 120, do_nothing)
 # Video aus Datei öffnen
 # cap = cv2.VideoCapture('../media/Alt_Papiertastatur_MitFinger.mp4')
 # cap = cv2.VideoCapture('../media/Alt_TastaturOhneAR.mp4')
-cap = cv2.VideoCapture('../media/TastaturOhneFinger.mp4')
+cap = cv2.VideoCapture('../media/TastaturMitFinger02.mp4')
 
 # Live Video
 # cap=cv2.VideoCapture(0)
@@ -544,7 +544,8 @@ while cap.isOpened():
                     commandStart = getMilliseconds()
                 elif isCommandTimeoutExceeded(commandStart):
                     print('distortion')
-                    distortion()
+                    value_distortion = ((finger_x - distortion_x) / distortion_w) * 100 # Zahl zischen 0 und 100
+                    distortion(int(value_distortion))
                     command = 'none'
             # Reverb
             elif (isFingerIn(finger_x, finger_y, reverb_x, reverb_y, reverb_w, reverb_h)):
