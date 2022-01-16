@@ -5,7 +5,7 @@ import time
 import numpy as np
 
 # ausgewählter Pixel für den Tastaturrand
-keyboard_border_color = cv2.imread('../media/Tastaturrand_Farbe.jpg',cv2.IMREAD_COLOR )
+keyboard_border_color = cv2.imread('../media/Alt_Tastaturrand_Farbe.jpg',cv2.IMREAD_COLOR )
 keyboard_border_color_HSV = cv2.cvtColor(keyboard_border_color, cv2.COLOR_BGR2HSV)
 h_keyboard_border_color = int(keyboard_border_color_HSV[0][0][0])
 s_keyboard_border_color = int(keyboard_border_color_HSV[0][0][1])
@@ -313,8 +313,8 @@ cv2.namedWindow("Finger")
 cv2.createTrackbar("ThresholdFinger", "Finger", 70, 100, do_nothing)
 
 # Video aus Datei öffnen
-# cap = cv2.VideoCapture('../media/Papiertastatur_MitFinger.mp4')
-cap = cv2.VideoCapture('../media/TastaturOhneAR.mp4')
+# cap = cv2.VideoCapture('../media/Alt_Papiertastatur_MitFinger.mp4')
+cap = cv2.VideoCapture('../media/Alt_TastaturOhneAR.mp4')
 
 # Live Video
 #cap=cv2.VideoCapture(0)
