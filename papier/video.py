@@ -158,16 +158,20 @@ def reverb(index):
     sendMessage(data)
 
 #--------------------------FUNKTIONEN FÜRS VIDEO-------------------------------------------
-def findBiggestRegionForColor(frame, h, s, v, threshold):
+def findBiggestRegionForColor(frame, h, s, v, h_threshold, s_threshold, v_threshold):
 
     # Umwandlung in HSV Farbraum
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    lower = np.array([h - threshold, s - threshold, v - threshold])
-    upper = np.array([h + threshold, s + threshold, v + threshold])
+    lower = np.array([h - h_threshold, s_threshold, v_threshold])
+    upper = np.array([h + h_threshold, 255, 255])
 
     # Threshold HSV image um nur Piano Randfarben zu bekommen
     mask = cv2.inRange(hsv, lower, upper)
+
+    # Dilation: Schwächere Pixel stärken
+    kernel = np.ones((2,2),np.uint8)
+    mask = cv2.dilate(mask,kernel,iterations = 5)
 
     # Region Finding Algorithmus: liefert Array contours, jedes Objekt repräsentiert eine zusammenhängende Region
     contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -278,7 +282,6 @@ def getReverbRegion(keyboard_x,keyboard_y,pixel_size, reverb_number):
 def isFingerIn(finger_x, finger_y, rectangle_x, rectangle_y, rectangle_w, rectangle_h):
     return (rectangle_x < finger_x) and (finger_x < rectangle_x + rectangle_w) and (rectangle_y < finger_y) and (finger_y < rectangle_y + rectangle_h)
 
-
 def getMilliseconds():
     return time.time_ns() // 1_000_000 
 
@@ -299,13 +302,13 @@ def colorPicker(event,x,y,flags,param):
         h_keyboard_border_color = int(color_HSV[0][0][0])
         s_keyboard_border_color = int(color_HSV[0][0][1])
         v_keyboard_border_color = int(color_HSV[0][0][2])
-        print("Tastaturfarbe angepasst")
+        print("Tastaturfarbe angepasst", pixel, color_HSV)
     #Rechtsklick passt die Farbe der Hand an
     elif event == cv2.EVENT_RBUTTONDOWN:
         h_finger_color = int(color_HSV[0][0][0])
         s_finger_color = int(color_HSV[0][0][1])
         v_finger_color = int(color_HSV[0][0][2])
-        print("Handfarbe angepasst")
+        print("Handfarbe angepasst", pixel, color_HSV)
 
 
 # ------------------------- VIDEO  --------------------------------------------------------
@@ -313,20 +316,24 @@ def colorPicker(event,x,y,flags,param):
 # Named Window Tastatur erstellen
 cv2.namedWindow("Tastatur")
 # Tracker in Tastatur Window erstellen
-cv2.createTrackbar("ThresholdTastatur", "Tastatur", 120, 120, do_nothing)
+cv2.createTrackbar("HThresTastatur", "Tastatur", 15, 120, do_nothing)
+cv2.createTrackbar("SThresTastatur", "Tastatur", 60, 120, do_nothing)
+cv2.createTrackbar("VThresTastatur", "Tastatur", 20, 120, do_nothing)
 
 # Named Window Finger erstellen
 cv2.namedWindow("Finger")
 # Tracker in Finger Window erstellen
-cv2.createTrackbar("ThresholdFinger", "Finger", 70, 120, do_nothing)
+cv2.createTrackbar("HThresFinger", "Finger", 15, 120, do_nothing)
+cv2.createTrackbar("SThresFinger", "Finger", 60, 120, do_nothing)
+cv2.createTrackbar("VThresFinger", "Finger", 50, 120, do_nothing)
 
 # Video aus Datei öffnen
 # cap = cv2.VideoCapture('../media/Alt_Papiertastatur_MitFinger.mp4')
 # cap = cv2.VideoCapture('../media/Alt_TastaturOhneAR.mp4')
-cap = cv2.VideoCapture('../media/TastaturMitFinger02.mp4')
+#cap = cv2.VideoCapture('../media/TastaturMitFinger02.mp4')
 
 # Live Video
-# cap=cv2.VideoCapture(0)
+cap=cv2.VideoCapture(0)
 
 # Zeitstempel für die Finger Kommandos
 commandStart = getMilliseconds()
@@ -334,7 +341,7 @@ while cap.isOpened():
     ret, frame = cap.read()
 
     # Skaling (für mp4-Video)
-    frame = cv2.resize(frame, (960, 540))
+    #frame = cv2.resize(frame, (960, 540))
     
     # Original Video anzeigen
     cv2.imshow('Original', frame)
@@ -344,9 +351,11 @@ while cap.isOpened():
     ###################### FINGER #################################
 
     # Threshold Wert aus Tracker lesen
-    finger_threshold = cv2.getTrackbarPos('ThresholdFinger', 'Finger')
+    h_finger_threshold = cv2.getTrackbarPos('HThresFinger', 'Finger')
+    s_finger_threshold = cv2.getTrackbarPos('SThresFinger', 'Finger')
+    v_finger_threshold = cv2.getTrackbarPos('VThresFinger', 'Finger')
     # Finger Rand finden
-    finger_mask, finger_contours, finger_biggestRegionIndex, finger_cnt = findBiggestRegionForColor(frame, h_finger_color, s_finger_color, v_finger_color, finger_threshold)
+    finger_mask, finger_contours, finger_biggestRegionIndex, finger_cnt = findBiggestRegionForColor(frame, h_finger_color, s_finger_color, v_finger_color, h_finger_threshold, s_finger_threshold, v_finger_threshold)
     if(type(finger_cnt) != int):
         # Zeichnet größte Region (Finger) weiß
         cv2.drawContours(finger_mask, finger_contours, finger_biggestRegionIndex, (255,255,255), cv2.FILLED)
@@ -360,9 +369,11 @@ while cap.isOpened():
         ###################### KEYBOARD #################################
 
         # Threshold Wert aus Tracker lesen
-        keyboard_threshold = cv2.getTrackbarPos('ThresholdTastatur', 'Tastatur')
+        h_keyboard_threshold = cv2.getTrackbarPos('HThresTastatur', 'Tastatur')
+        s_keyboard_threshold = cv2.getTrackbarPos('SThresTastatur', 'Tastatur')
+        v_keyboard_threshold = cv2.getTrackbarPos('VThresTastatur', 'Tastatur')
         # Keyboard Rand finden
-        keyboard_mask, keyboard_contours, keyboard_biggestRegionIndex, keyboard_cnt = findBiggestRegionForColor(frame, h_keyboard_border_color, s_keyboard_border_color, v_keyboard_border_color, keyboard_threshold)
+        keyboard_mask, keyboard_contours, keyboard_biggestRegionIndex, keyboard_cnt = findBiggestRegionForColor(frame, h_keyboard_border_color, s_keyboard_border_color, v_keyboard_border_color, h_keyboard_threshold, s_keyboard_threshold, v_keyboard_threshold)
 
         if(type(keyboard_cnt) != int):
             # Zeichnet größte Region (Keyboard) weiß
