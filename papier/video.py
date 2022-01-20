@@ -330,7 +330,7 @@ cv2.createTrackbar("VThresFinger", "Finger", 50, 120, do_nothing)
 # Video aus Datei öffnen
 # cap = cv2.VideoCapture('../media/Alt_Papiertastatur_MitFinger.mp4')
 # cap = cv2.VideoCapture('../media/Alt_TastaturOhneAR.mp4')
-#cap = cv2.VideoCapture('../media/TastaturMitFinger02.mp4')
+# cap = cv2.VideoCapture('../media/TastaturMitFinger02.mp4')
 
 # Live Video
 cap=cv2.VideoCapture(0)
@@ -341,7 +341,7 @@ while cap.isOpened():
     ret, frame = cap.read()
 
     # Skaling (für mp4-Video)
-    #frame = cv2.resize(frame, (960, 540))
+    # frame = cv2.resize(frame, (960, 540))
     
     # Original Video anzeigen
     cv2.imshow('Original', frame)
@@ -387,32 +387,27 @@ while cap.isOpened():
             keyboard_rect = cv2.minAreaRect(keyboard_cnt)
             keyboard_box = cv2.boxPoints(keyboard_rect)
             keyboard_box = np.int0(keyboard_box)
-            # keyboard_box_x = keyboard_box[0][0]
-            # keyboard_box_y = keyboard_box[0][1]
-            # keyboard_box_w = keyboard_rect[1][0]
-            # keyboard_box_h = keyboard_rect[1][1]
-            # cv2.drawContours(frame,[keyboard_box],0,(255,0,255),2)
-            # Hiermit kann später die Tastatur genauer erfasst werden, auch wenn sie gedreht ist
+            cv2.drawContours(frame,[keyboard_box],0,(255,0,255),2)
+            # Wenn Papier zu sehr gedreht, Warnung ausgeben
+            if (keyboard_rect[2] > 5.0 and keyboard_rect[2] < 85.0):
+                print('Bitte richte das Papier parallel zur Kamera aus')
 
             # Keyboard zeichnen
             keyboard_x,keyboard_y,keyboard_w,keyboard_h = cv2.boundingRect(keyboard_cnt)
             # es ist möglich dass die Hand/Finger ein Teil der Tasatur abdeckt
             # in diesem Fall wird nicht die ganze Tastatur als Contour identifiziert, sondern nur einen Teil
             # und wir müssen die richtigen Koordinaten berechnen
-            if (keyboard_w < 2 * keyboard_h):
+            if (keyboard_w < 1.95 * keyboard_h):
                 # Teil der Tastatur ist von Hand abgedeckt und muss richtig berechnete werden
-                # Shift nach Rechts für X
-                #keyboard_x = keyboard_x + keyboard_w
-                # neues Width berechnen
-                #keyboard_w = int(2.05 * keyboard_h)
-                # Shift nach Links für X
-                #keyboard_x = keyboard_x - keyboard_w
+                # Wenn Breite kleiner als 1.95 * Höhe ist, dann ist entweder links oder rechts teilweise bedeckt
+                # Dann greift das Programm kurzzeitig auf die vorher gespeicherten Punkte zu
                 keyboard_x = savedXKeyboard
                 keyboard_w = savedWKeyboard
             else:
                 if(savedWKeyboard != keyboard_w or savedXKeyboard != keyboard_x):
                     savedXKeyboard = keyboard_x
                     savedWKeyboard = keyboard_w
+                   
 
             cv2.rectangle(frame, (keyboard_x, keyboard_y), (keyboard_x + keyboard_w, keyboard_y + keyboard_h), color=(0, 255, 0), thickness=2)
 
