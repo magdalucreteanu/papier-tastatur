@@ -192,9 +192,11 @@ def findBiggestRegionForColor(frame, h, s, v, h_threshold, s_threshold, v_thresh
             cnt = contours[index]
     return mask, contours, biggestRegionIndex, cnt
 
+# Pixel Größenverhälnis errechnen
 def getPixelSize(w):
     return 1.0 * w / (paper_outer_margin_lower_y - paper_outer_margin_upper_y)
 
+# Innere Tastatur Werte der Region berechnen
 def getInnerKeyboard(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size):
     innerKeyboard_x = keyboard_x + pixel_size * (paper_inner_margin_upper_x - paper_outer_margin_upper_x)
     innerKeyboard_y = keyboard_y + pixel_size * (paper_inner_margin_upper_y - paper_outer_margin_upper_y) 
@@ -202,6 +204,7 @@ def getInnerKeyboard(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size):
     innerKeyboard_h = keyboard_h - 2 * (pixel_size * (paper_inner_margin_upper_y - paper_outer_margin_upper_y))
     return int(innerKeyboard_x), int(innerKeyboard_y), int(innerKeyboard_w), int(innerKeyboard_h)
 
+# Weiße Tasten Werte der Region berechnen
 def getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size, key_number):
     # Keyboard innen Koordinaten links oben + Weite und Höhe
     innerKeyborad_x = keyboard_x + pixel_size * (paper_inner_margin_upper_x - paper_outer_margin_upper_x)
@@ -214,6 +217,7 @@ def getWhiteKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size, ke
 
     return int(key_x), int(key_y), int(key_w), int(key_h)
 
+# Schwarze Tasten Werte der Region berechnen
 def getBlackKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size, key_number):
     # Für die "Lücke" in der Tastatur
     if key_number > 1:
@@ -230,6 +234,7 @@ def getBlackKeyRegion(keyboard_x,keyboard_y,keyboard_w,keyboard_h,pixel_size, ke
 
     return int(key_x), int(key_y), int(key_w), int(key_h)
 
+# Lautstärke Minus Werte der Region berechnen
 def getVolumeMinusRegion(keyboard_x,keyboard_y,pixel_size):
     volume_minus_x = keyboard_x + pixel_size * (paper_volume_minus_upper_x -  paper_outer_margin_upper_x)
     volume_minus_y = keyboard_y + pixel_size * (paper_volume_minus_upper_y - paper_outer_margin_upper_y)
@@ -237,6 +242,7 @@ def getVolumeMinusRegion(keyboard_x,keyboard_y,pixel_size):
     volume_minus_h = pixel_size * paper_volume_minus_h
     return int(volume_minus_x), int(volume_minus_y), int(volume_minus_w), int(volume_minus_h)
 
+# Lautstärke Minus Werte der Region berechnen
 def getVolumePlusRegion(keyboard_x,keyboard_y,pixel_size):
     volume_plus_x = keyboard_x + pixel_size * (paper_volume_plus_upper_x -  paper_outer_margin_upper_x)
     volume_plus_y = keyboard_y + pixel_size * (paper_volume_plus_upper_y - paper_outer_margin_upper_y)
@@ -244,6 +250,7 @@ def getVolumePlusRegion(keyboard_x,keyboard_y,pixel_size):
     volume_plus_h = pixel_size * paper_volume_plus_h
     return int(volume_plus_x), int(volume_plus_y), int(volume_plus_w), int(volume_plus_h)
 
+# Lautstärke Plus Werte der Region berechnen
 def getPianoRegion(keyboard_x,keyboard_y,pixel_size):
     # Nicht das Piano, sondern nur der Piano Button
     piano_x = keyboard_x + pixel_size * (paper_piano_upper_x -  paper_outer_margin_upper_x)
@@ -252,6 +259,7 @@ def getPianoRegion(keyboard_x,keyboard_y,pixel_size):
     piano_h = pixel_size * paper_piano_h
     return int(piano_x), int(piano_y), int(piano_w), int(piano_h)
 
+# Synthesizer Werte der Region berechnen
 def getSynthRegion(keyboard_x,keyboard_y,pixel_size):
     synth_x = keyboard_x + pixel_size * (paper_synth_upper_x -  paper_outer_margin_upper_x)
     synth_y = keyboard_y + pixel_size * (paper_synth_upper_y - paper_outer_margin_upper_y)
@@ -259,6 +267,7 @@ def getSynthRegion(keyboard_x,keyboard_y,pixel_size):
     synth_h = pixel_size * paper_synth_h
     return int(synth_x), int(synth_y), int(synth_w), int(synth_h)
 
+# Distortion Werte der Region berechnen
 def getDistortionRegion(keyboard_x,keyboard_y,pixel_size):
     distortion_x = keyboard_x + pixel_size * (paper_distortion_upper_x -  paper_outer_margin_upper_x)
     distortion_y = keyboard_y + pixel_size * (paper_distortion_upper_y - paper_outer_margin_upper_y)
@@ -266,6 +275,7 @@ def getDistortionRegion(keyboard_x,keyboard_y,pixel_size):
     distortion_h = pixel_size * paper_distortion_h
     return int(distortion_x), int(distortion_y), int(distortion_w), int(distortion_h)
 
+# Reverb Werte der ganzen Region berechnen
 def getReverbFullRegion(keyboard_x,keyboard_y,pixel_size ):
     reverb_x = keyboard_x + pixel_size * (paper_reverb_upper_x -  paper_outer_margin_upper_x)
     reverb_y = keyboard_y + pixel_size * (paper_reverb_upper_y - paper_outer_margin_upper_y)
@@ -273,6 +283,7 @@ def getReverbFullRegion(keyboard_x,keyboard_y,pixel_size ):
     reverb_h = pixel_size * paper_reverb_h
     return int(reverb_x), int(reverb_y), int(reverb_w), int(reverb_h)
 
+# Reverb Werte der einzelnen Regionen berechnen
 def getReverbRegion(keyboard_x,keyboard_y,pixel_size, reverb_number):
     reverb_x = keyboard_x + pixel_size * (paper_reverb_upper_x -  paper_outer_margin_upper_x)
     reverb_y = keyboard_y + pixel_size * (paper_reverb_upper_y - paper_outer_margin_upper_y)
@@ -281,16 +292,20 @@ def getReverbRegion(keyboard_x,keyboard_y,pixel_size, reverb_number):
     reverb_x = reverb_x + (reverb_number ) * reverb_w 
     return int(reverb_x), int(reverb_y), int(reverb_w), int(reverb_h)
 
+# Berechnung, ob der Finger sich in einer Region befindet
 def isFingerIn(finger_x, finger_y, rectangle_x, rectangle_y, rectangle_w, rectangle_h):
     return (rectangle_x < finger_x) and (finger_x < rectangle_x + rectangle_w) and (rectangle_y < finger_y) and (finger_y < rectangle_y + rectangle_h)
 
+# Millisekunden bekommen
 def getMilliseconds():
     return time.time_ns() // 1_000_000 
 
+# Hat ein Kommanda die vorgegebene Zeit überschritten
 def isCommandTimeoutExceeded(commandStart):
     currentTime = getMilliseconds()
     return (currentTime - commandStart) > 1000
 
+# Farben des Tastaturrands und der Hand anpassen
 def colorPicker(event,x,y,flags,param): 
     # Bei anderen Lichtverhältnissen die Farbe anpassen
     global h_keyboard_border_color, s_keyboard_border_color, v_keyboard_border_color, h_finger_color, s_finger_color, v_finger_color
@@ -304,13 +319,13 @@ def colorPicker(event,x,y,flags,param):
         h_keyboard_border_color = int(color_HSV[0][0][0])
         s_keyboard_border_color = int(color_HSV[0][0][1])
         v_keyboard_border_color = int(color_HSV[0][0][2])
-        print("Tastaturfarbe angepasst", pixel, color_HSV)
+        print("Tastaturfarbe angepasst")
     #Rechtsklick passt die Farbe der Hand an
     elif event == cv2.EVENT_RBUTTONDOWN:
         h_finger_color = int(color_HSV[0][0][0])
         s_finger_color = int(color_HSV[0][0][1])
         v_finger_color = int(color_HSV[0][0][2])
-        print("Handfarbe angepasst", pixel, color_HSV)
+        print("Handfarbe angepasst")
 
 
 # ------------------------- VIDEO  --------------------------------------------------------
@@ -330,10 +345,13 @@ cv2.createTrackbar("SThresFinger", "Finger", 60, 120, do_nothing)
 cv2.createTrackbar("VThresFinger", "Finger", 50, 120, do_nothing)
 
 # Video aus Datei öffnen
-cap = cv2.VideoCapture('../media/Tastatur_MitFinger.mp4')
+cap = cv2.VideoCapture('../media/Tastatur_MitFinger_01.mp4')
+# cap = cv2.VideoCapture('../media/Tastatur_MitFinger_02.mp4')
+# cap = cv2.VideoCapture('../media/Tastatur_MitFinger_03.mp4')
+# cap = cv2.VideoCapture('../media/Tastatur_MitFinger_04.mp4')
 
 # Live Video
-#cap=cv2.VideoCapture(0)
+# cap=cv2.VideoCapture(0)
 
 # Zeitstempel für die Finger Kommandos
 commandStart = getMilliseconds()
@@ -346,6 +364,7 @@ while cap.isOpened():
     # Original Video anzeigen
     cv2.imshow('Original', frame)
 
+    # Farben des Tastaturrands und der Hand anpassen
     cv2.setMouseCallback("Original", colorPicker)
 
     ###################### FINGER #################################
@@ -380,6 +399,7 @@ while cap.isOpened():
             cv2.drawContours(keyboard_mask, keyboard_contours, keyboard_biggestRegionIndex, (255,255,255), cv2.FILLED)
 
             # Rotiertes Keyboard
+            # von https://docs.opencv.org/3.4/dd/d49/tutorial_py_contour_features.html
             # Here, bounding rectangle is drawn with minimum area, so it considers the rotation also. 
             # The function used is cv.minAreaRect(). It returns a Box2D structure which contains 
             # following details - ( center (x,y), (width, height), angle of rotation ). 
@@ -390,30 +410,42 @@ while cap.isOpened():
             cv2.drawContours(frame,[keyboard_box],0,(255,0,255),2)
             # Wenn Papier zu sehr gedreht, Warnung ausgeben
             if (keyboard_rect[2] > 5.0 and keyboard_rect[2] < 85.0):
-                print('Bitte richte das Papier parallel zur Kamera aus')
+                print('Das Papier ist zur Zeit zu sehr gedreht. Bitte richte das Papier gerade aus.')
 
             # Keyboard zeichnen
+            # Keyboard Werte bestimmen
             keyboard_x,keyboard_y,keyboard_w,keyboard_h = cv2.boundingRect(keyboard_cnt)
-            # es ist möglich dass die Hand/Finger ein Teil der Tasatur abdeckt
-            # in diesem Fall wird nicht die ganze Tastatur als Contour identifiziert, sondern nur einen Teil
+            # Es ist möglich dass die Hand / der Finger ein Teil der Tasatur abdeckt
+            # In diesem Fall wird nicht die ganze Tastatur als Contour identifiziert, sondern nur einen Teil
             # und wir müssen die richtigen Koordinaten berechnen
             if (keyboard_w < 1.95 * keyboard_h):
-                # Teil der Tastatur ist von Hand abgedeckt und muss richtig berechnete werden
+                # Teil der Tastatur ist von Hand abgedeckt und muss richtig berechnet werden
                 # Wenn Breite kleiner als 1.95 * Höhe ist, dann ist entweder links oder rechts teilweise bedeckt
                 # Dann greift das Programm kurzzeitig auf die vorher gespeicherten Punkte zu
-                keyboard_x = savedXKeyboard
-                keyboard_w = savedWKeyboard
-            else:
-                if(savedWKeyboard != keyboard_w or savedXKeyboard != keyboard_x):
-                    savedXKeyboard = keyboard_x
-                    savedWKeyboard = keyboard_w
-                   
 
+               # Verdeckte Seite ermitteln
+                if((keyboard_x - savedXKeyboard) > (savedWKeyboard/20)):
+                    print('Links verdeckt!')
+                    # Links ist verdeckt, X-Koordinate und Weite überschreiben
+                    keyboard_x = savedXKeyboard
+                    keyboard_w = savedWKeyboard
+                else:
+                    print('Rechts verdeckt!')
+                    # Rechts ist verdeckt, X-Koordinate stimmt also noch, nur Weite muss korrigiert werden
+                    keyboard_w = savedWKeyboard
+               
+            else:
+                # Falls das nicht der Fall sein sollte, jetzige Punkte der Tastatur zwischenspeichern
+                if(savedWKeyboard != keyboard_w or savedXKeyboard != keyboard_x):
+                        savedXKeyboard = keyboard_x
+                        savedWKeyboard = keyboard_w
+
+            # Tatsächliches Zeichnen des Keyboards
             cv2.rectangle(frame, (keyboard_x, keyboard_y), (keyboard_x + keyboard_w, keyboard_y + keyboard_h), color=(0, 255, 0), thickness=2)
 
             ###################### PIXEL GRÖßE #################################
 
-            # relative Pixelgröße finden
+            # Relative Pixelgröße finden
             pixel_size = getPixelSize(keyboard_h)
 
             ###################### KNÖPFE #################################
@@ -478,6 +510,11 @@ while cap.isOpened():
             
             ###################### PRÜFE WELCHES ELEMENT WURDE GEDRÜCKT #################################
 
+            # Überprüfen, ob ein Element gedrückt wurde. Wenn der Finger sich eine Sekunde auf einer Taste befindet, wird diese ausgelöst.
+            # Durch das Warten von einer Sekunde wird sichergestellt, dass die Taste nicht versehentlich ausgelöst wird. 
+            # Zum Beispiel, wenn die Hand nur kurz über die Tastatur bewegt wird, um an die Tasten oben zu kommen.
+            # Das entsprechende Kommando der jeweiligen Taste wird dann mit Web Sockets an den Audio-Teil gesendet.
+            
             finger_x = finger_upper_point[0]
             finger_y = finger_upper_point[1]
             fingerOnBlackKey = False
@@ -543,14 +580,14 @@ while cap.isOpened():
                     print('Synth')
                     synth()
                     command = 'none'
-            # distortion
+            # Distortion
             elif (isFingerIn(finger_x, finger_y, distortion_x, distortion_y, distortion_w, distortion_h)):
                 if (command != "distortion"):
                     command = "distortion"
                     commandStart = getMilliseconds()
                 elif isCommandTimeoutExceeded(commandStart):
-                    print('distortion')
                     value_distortion = ((finger_x - distortion_x) / distortion_w) * 100 # Zahl zischen 0 und 100
+                    print('Distortion ' + str(value_distortion))
                     distortion(int(value_distortion))
                     command = 'none'
             # Reverb
