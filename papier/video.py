@@ -4,14 +4,14 @@ import json
 import time
 import numpy as np
 
-# ausgewählter Pixel für den Tastaturrand
+# Ausgewählter Pixel für den Tastaturrand, einlesen und in HSV-Farbbereich umwandeln
 keyboard_border_color = cv2.imread('../media/Tastaturrand_Farbe.jpg',cv2.IMREAD_COLOR )
 keyboard_border_color_HSV = cv2.cvtColor(keyboard_border_color, cv2.COLOR_BGR2HSV)
 h_keyboard_border_color = int(keyboard_border_color_HSV[0][0][0])
 s_keyboard_border_color = int(keyboard_border_color_HSV[0][0][1])
 v_keyboard_border_color = int(keyboard_border_color_HSV[0][0][2])
 
-# ausgewählter Pixel für den Finger
+# Ausgewählter Pixel für den Finger, einlesen und in HSV-Farbbereich umwandeln
 finger_color = cv2.imread('../media/Finger_Farbe.jpg',cv2.IMREAD_COLOR )
 finger_color_HSV = cv2.cvtColor(finger_color, cv2.COLOR_BGR2HSV)
 h_finger_color = int(finger_color_HSV[0][0][0])
@@ -20,11 +20,10 @@ v_finger_color = int(finger_color_HSV[0][0][2])
 finger_radius = 30
 
 # Koordinaten der Elemente innerhalb des originalen Bilders (mit den zwei Beispieltastaturen)
-# Das Bild befindet sich in media/Papier_Tastatur_Image.jpeg
 # Wir identifizieren este die Tastatur anhand des roten Randes.
 # Danach finden wir die einzelnen Elemente mathematisch anhand der Koordinaten.
 
-# Tastatur
+# Tastatur-Kooardinaten
 # Outer
 paper_outer_margin_upper_x = 171
 paper_outer_margin_upper_y = 1239
@@ -62,16 +61,17 @@ paper_synth_h = 89
 
 # Distortion
 paper_distortion_upper_x = 624
-paper_distortion_upper_y = 1065
-paper_distortion_w = 304
+paper_distortion_upper_y = 1015
+paper_distortion_w = 290
 paper_distortion_h = 45
 
 # Reverb
 paper_reverb_upper_x = 624
-paper_reverb_upper_y = 1135
-paper_reverb_w = 304
-paper_reverb_h = 50
+paper_reverb_upper_y = 1108
+paper_reverb_w = 290
+paper_reverb_h = 63
 
+# Gespeicherte Werte
 command = 'none'
 savedXKeyboard = 0
 savedWKeyboard = 0
@@ -158,6 +158,8 @@ def reverb(index):
     sendMessage(data)
 
 #--------------------------FUNKTIONEN FÜRS VIDEO-------------------------------------------
+
+# Größe Region einer Farbe finden
 def findBiggestRegionForColor(frame, h, s, v, h_threshold, s_threshold, v_threshold):
 
     # Umwandlung in HSV Farbraum
@@ -166,7 +168,7 @@ def findBiggestRegionForColor(frame, h, s, v, h_threshold, s_threshold, v_thresh
     lower = np.array([h - h_threshold, s_threshold, v_threshold])
     upper = np.array([h + h_threshold, 255, 255])
 
-    # Threshold HSV image um nur Piano Randfarben zu bekommen
+    # Threshold HSV Image um nur Piano Randfarben zu bekommen
     mask = cv2.inRange(hsv, lower, upper)
 
     # Dilation: Schwächere Pixel stärken
@@ -328,12 +330,10 @@ cv2.createTrackbar("SThresFinger", "Finger", 60, 120, do_nothing)
 cv2.createTrackbar("VThresFinger", "Finger", 50, 120, do_nothing)
 
 # Video aus Datei öffnen
-# cap = cv2.VideoCapture('../media/Alt_Papiertastatur_MitFinger.mp4')
-# cap = cv2.VideoCapture('../media/Alt_TastaturOhneAR.mp4')
-# cap = cv2.VideoCapture('../media/TastaturMitFinger02.mp4')
+cap = cv2.VideoCapture('../media/Tastatur_MitFinger.mp4')
 
 # Live Video
-cap=cv2.VideoCapture(0)
+#cap=cv2.VideoCapture(0)
 
 # Zeitstempel für die Finger Kommandos
 commandStart = getMilliseconds()
@@ -341,7 +341,7 @@ while cap.isOpened():
     ret, frame = cap.read()
 
     # Skaling (für mp4-Video)
-    # frame = cv2.resize(frame, (960, 540))
+    frame = cv2.resize(frame, (960, 540))
     
     # Original Video anzeigen
     cv2.imshow('Original', frame)
@@ -413,7 +413,7 @@ while cap.isOpened():
 
             ###################### PIXEL GRÖßE #################################
 
-            # relative Pixelgrüße finden
+            # relative Pixelgröße finden
             pixel_size = getPixelSize(keyboard_h)
 
             ###################### KNÖPFE #################################
