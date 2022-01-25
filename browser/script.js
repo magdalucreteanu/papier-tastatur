@@ -249,6 +249,20 @@ function distortion(obj) {
   distortionNode.curve = makeDistortionCurve(obj)
 }
 
+// Reverb
+function reverb(obj) {
+  let index = obj.index
+  if (index === 0) {
+    cave()
+  } else if (index === 1) {
+    church()
+  } else if (index === 2) {
+    garage()
+  } else if (index === 3) {
+    room()
+  }
+}
+
 // Cave
 function cave() {
   loadImpulseResponse('cave')
@@ -293,10 +307,10 @@ function websocketMessage(message) {
       blackKey(obj)
       break
     case 'distortion':
-      distortion(obj)
+      distortion(obj.value)
       break
-    case 'release':
-      release(obj)
+    case 'reverb':
+      reverb(obj)
       break
   }
 }
