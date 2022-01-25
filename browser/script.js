@@ -110,6 +110,9 @@ function loadImpulseResponse(name) {
 }
 
 function makeDistortionCurve(amount) {
+  document.getElementById("distortionOutput").innerHTML = amount
+  document.getElementById("distortionSlider").value = amount
+
   var n_samples = 44100,
       curve = new Float32Array(n_samples)
 
@@ -244,7 +247,6 @@ function whiteKey(obj) {
 // Distortion
 function distortion(obj) {
   distortionNode.curve = makeDistortionCurve(obj)
-  document.querySelector("#distortionOutput").innerHTML = obj
 }
 
 // Cave
