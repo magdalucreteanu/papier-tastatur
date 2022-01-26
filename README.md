@@ -60,10 +60,6 @@ Projektkonzept
 - Bilder referenzieren und verzeichnen
 
 ## Geplante Aufgaben
-- Identifizieren welche Taste wurde gedrückt auf die Papier Tastatur mittels OpenCV
-- Informationen über die gedrückten Knöpfe mit WebSockets/MIDI an HTML übergeben 
-- Papier- und HTML-Knöpfe sind beide funktional
-- Weitere Tests eventuell Bugfixes
 - Präsentation Projektergebnis
 - Abgabe Projektdokumentation und Konzept
 
@@ -78,6 +74,10 @@ Projektkonzept
 - Klaviertastatur graphisch mit HTML erstellen
 - Präsentation Inkrement
 - Weitere Knöpfe (für Lautstärke, Effekte usw.) in HTML erstellen
+- Identifizieren welche Taste wurde gedrückt auf die Papier Tastatur mittels OpenCV
+- Informationen über die gedrückten Knöpfe mit WebSockets/MIDI an HTML übergeben 
+- Papier- und HTML-Knöpfe sind beide funktional
+- Weitere Tests eventuell Bugfixes
 
 ## Code und Algorithmen
 
