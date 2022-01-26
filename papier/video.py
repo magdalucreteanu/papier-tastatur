@@ -75,6 +75,7 @@ paper_reverb_h = 63
 command = 'none'
 savedXKeyboard = 0
 savedWKeyboard = 0
+printAgain = True
 
 # Callback Funktion für Slider - tut nichts
 def do_nothing(no):
@@ -160,7 +161,7 @@ def reverb(index):
 #--------------------------FUNKTIONEN FÜRS VIDEO-------------------------------------------
 
 # Größe Region einer Farbe finden
-def findBiggestRegionForColor(frame, h, s, v, h_threshold, s_threshold_min, v_threshold_min):
+def findBiggestRegionForColor(frame, h, s, v, h_threshold, s_threshold_min, v_threshold_min, isHand):
     # Umwandlung in HSV Farbraum
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
@@ -172,8 +173,20 @@ def findBiggestRegionForColor(frame, h, s, v, h_threshold, s_threshold_min, v_th
     mask = cv2.inRange(hsv, lower, upper)
 
     # Dilation: Schwächere Pixel stärken
-    kernel = np.ones((2,2),np.uint8)
-    mask = cv2.dilate(mask,kernel,iterations = 5)
+    kernel = np.ones((3,3),np.uint8)
+    mask = cv2.dilate(mask,kernel,iterations = 1)
+    
+    # Opening: Noise aus dem Hintergrund entfernen
+    # Für die Hand etwas höher eingestellt, um bei Schattenwurf weniger Störungen zu haben
+    if(isHand == True):
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (15,15))
+        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+    else:
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
+        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+
+    # Medianfilter: Bild "smoothen"
+    mask = cv2.medianBlur(mask, 5)
 
     # Region Finding Algorithmus: liefert Array contours, jedes Objekt repräsentiert eine zusammenhängende Region
     contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -341,8 +354,8 @@ cv2.createTrackbar("VThresTastaturMin", "Tastatur", 20, 120, do_nothing)
 cv2.namedWindow("Finger")
 # Tracker in Finger Window erstellen
 cv2.createTrackbar("HThresFinger", "Finger", 15, 120, do_nothing)
-cv2.createTrackbar("SThresFingerMin", "Finger", 60, 120, do_nothing)
-cv2.createTrackbar("VThresFingerMin", "Finger", 20, 120, do_nothing)
+cv2.createTrackbar("SThresFingerMin", "Finger", 70, 120, do_nothing)
+cv2.createTrackbar("VThresFingerMin", "Finger", 40, 120, do_nothing)
 
 # Video aus Datei öffnen
 # cap = cv2.VideoCapture('../media/Tastatur_MitFinger_01.mp4')
@@ -358,7 +371,7 @@ commandStart = getMilliseconds()
 while cap.isOpened():
     ret, frame = cap.read()
 
-    # Skaling (für mp4-Video)
+    # Skaling (für mp4-Video aus Datei)
     frame = cv2.resize(frame, (960, 540))
 
     # Original Video anzeigen
@@ -374,7 +387,7 @@ while cap.isOpened():
     s_finger_threshold_min = cv2.getTrackbarPos('SThresFingerMin', 'Finger')
     v_finger_threshold_min = cv2.getTrackbarPos('VThresFingerMin', 'Finger')
     # Finger Rand finden
-    finger_mask, finger_contours, finger_biggestRegionIndex, finger_cnt = findBiggestRegionForColor(frame, h_finger_color, s_finger_color, v_finger_color, h_finger_threshold, s_finger_threshold_min, v_finger_threshold_min)
+    finger_mask, finger_contours, finger_biggestRegionIndex, finger_cnt = findBiggestRegionForColor(frame, h_finger_color, s_finger_color, v_finger_color, h_finger_threshold, s_finger_threshold_min, v_finger_threshold_min, True)
     
     # Wenn CNT für Finger vorhanden ist
     if(type(finger_cnt) != int):
@@ -396,7 +409,7 @@ while cap.isOpened():
     s_keyboard_threshold_min = cv2.getTrackbarPos('SThresTastaturMin', 'Tastatur')
     v_keyboard_threshold_min = cv2.getTrackbarPos('VThresTastaturMin', 'Tastatur')
     # Keyboard Rand finden
-    keyboard_mask, keyboard_contours, keyboard_biggestRegionIndex, keyboard_cnt = findBiggestRegionForColor(frame, h_keyboard_border_color, s_keyboard_border_color, v_keyboard_border_color, h_keyboard_threshold, s_keyboard_threshold_min, v_keyboard_threshold_min)
+    keyboard_mask, keyboard_contours, keyboard_biggestRegionIndex, keyboard_cnt = findBiggestRegionForColor(frame, h_keyboard_border_color, s_keyboard_border_color, v_keyboard_border_color, h_keyboard_threshold, s_keyboard_threshold_min, v_keyboard_threshold_min, False)
 
     # Wenn CNT für Keyboard vorhanden ist
     if(type(keyboard_cnt) != int):
@@ -415,8 +428,12 @@ while cap.isOpened():
         # cv2.drawContours(frame,[keyboard_box],0,(255,0,255),2) # Kontur malen
         # Wenn Papier zu sehr gedreht, Warnung ausgeben
         if (keyboard_rect[2] > 5.0 and keyboard_rect[2] < 85.0):
-            print('Das Papier ist zur Zeit zu sehr gedreht. Bitte richte das Papier gerade aus.')
-
+            if(printAgain == True):
+                print('Das Papier ist zur Zeit zu sehr gedreht. Bitte richte das Papier gerade aus.')
+                printAgain=False
+        else:
+            printAgain=True
+       
         # Keyboard zeichnen
         # Keyboard Werte bestimmen
         keyboard_x,keyboard_y,keyboard_w,keyboard_h = cv2.boundingRect(keyboard_cnt)
@@ -430,12 +447,10 @@ while cap.isOpened():
 
             # Verdeckte Seite ermitteln
             if((keyboard_x - savedXKeyboard) > (savedWKeyboard/20)):
-                # print('Links verdeckt!')
                 # Links ist verdeckt, X-Koordinate und Weite überschreiben
                 keyboard_x = savedXKeyboard
                 keyboard_w = savedWKeyboard
             else:
-                # print('Rechts verdeckt!')
                 # Rechts ist verdeckt, X-Koordinate stimmt also noch, nur Weite muss korrigiert werden
                 keyboard_w = savedWKeyboard
             
