@@ -604,8 +604,8 @@ while cap.isOpened():
                     command = 'none'
             # Distortion
             elif (isFingerIn(finger_x, finger_y, distortion_x, distortion_y, distortion_w, distortion_h)):
-                if (command != "distortion"):
-                    command = "distortion"
+                if (command != "Distortion"):
+                    command = "Distortion"
                     commandStart = getMilliseconds()
                 elif isCommandTimeoutExceeded(commandStart):
                     value_distortion = ((finger_x - distortion_x) / distortion_w) * 100 # Zahl zischen 0 und 100
@@ -625,6 +625,10 @@ while cap.isOpened():
                             command = 'none'
             else:
                 command = 'none'
+
+    # Kommando als Text in Frame schreiben
+    cv2.putText(frame, 'Command: '+ command, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, 
+                (0, 0, 0), 2, cv2.LINE_AA)
 
     ###################### ERGEBNISSE #################################
 
