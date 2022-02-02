@@ -56,14 +56,6 @@ https://www.pyimagesearch.com/2016/04/11/finding-extreme-points-in-contours-with
 python -m http.server 9999  
 
 ## Offene Aufgaben
-Projektkonzept  
-- Sequence Diagram  
-- Usecase Diagram  
-- Quellen  
-- Bilder referenzieren und verzeichnen
-
-## Geplante Aufgaben
-- Präsentation Projektergebnis
 - Abgabe Projektdokumentation und Konzept
 
 ## Erledigte Aufgaben
@@ -81,6 +73,13 @@ Projektkonzept
 - Informationen über die gedrückten Knöpfe mit WebSockets/MIDI an HTML übergeben 
 - Papier- und HTML-Knöpfe sind beide funktional
 - Weitere Tests eventuell Bugfixes
+- Präsentation Projektergebnis
+
+Projektkonzept  
+- Sequence Diagram  
+- Usecase Diagram  
+- Quellen  
+- Bilder referenzieren und verzeichnen
 
 ## Code und Algorithmen
 
