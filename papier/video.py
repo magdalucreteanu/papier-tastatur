@@ -372,7 +372,7 @@ while cap.isOpened():
     ret, frame = cap.read()
 
     # Skaling (für mp4-Video aus Datei)
-    frame = cv2.resize(frame, (960, 540))
+    # frame = cv2.resize(frame, (960, 540))
 
     # Original Video anzeigen
     cv2.imshow('Original', frame)
