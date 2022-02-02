@@ -357,14 +357,14 @@ cv2.createTrackbar("HThresFinger", "Finger", 15, 120, do_nothing)
 cv2.createTrackbar("SThresFingerMin", "Finger", 70, 120, do_nothing)
 cv2.createTrackbar("VThresFingerMin", "Finger", 40, 120, do_nothing)
 
-# Video aus Datei öffnen
+# Video aus Datei öffnen (zum ausprobieren ohne Videoamera)
 # cap = cv2.VideoCapture('../media/Tastatur_MitFinger_01.mp4')
-cap = cv2.VideoCapture('../media/Tastatur_MitFinger_02.mp4')
+# cap = cv2.VideoCapture('../media/Tastatur_MitFinger_02.mp4')
 # cap = cv2.VideoCapture('../media/Tastatur_MitFinger_03.mp4')
 # cap = cv2.VideoCapture('../media/Tastatur_MitFinger_04.mp4')
 
 # Live Video
-# cap=cv2.VideoCapture(0)
+cap=cv2.VideoCapture(0)
 
 # Zeitstempel für die Finger Kommandos
 commandStart = getMilliseconds()
